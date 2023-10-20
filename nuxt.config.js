@@ -31,6 +31,9 @@ export default {
     path: process.cwd(),
   },
 
+  //loading component
+  loading: "./components/Loading.vue",
+
   // Modules: https://go.nuxtjs.dev/config-modules
   modules: [],
 
