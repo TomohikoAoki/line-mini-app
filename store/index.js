@@ -1,7 +1,7 @@
 const state = () => ({
   lineAccessToken: "token",
   profile: null,
-  memberId: null,
+  memberId: false,
 });
 
 const mutations = {

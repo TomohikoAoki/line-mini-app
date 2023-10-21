@@ -1,29 +1,19 @@
 <template>
     <div class="app-main">
         <div class="point-area">
-            <div v-if="memberId">
+            <div>
                 <h1 class="point-title">ハートフルポイント</h1>
                 <div class="point-content">
                     <p class="current-point">現在のポイント:</p>
                     <p class="point-display"><span class="point">{{ point }}</span><span class="pt">pt</span></p>
                 </div>
             </div>
-            <div v-else>
-                会員情報と紐づけされていないため、<br>表示できません。<br>
-                こちらよりハートフル会員登録をお願いします。
-                <button class="btn"><nuxt-link to="/register">会員登録</nuxt-link></button>
-            </div>
         </div>
         <div class="navi">
-            <div class="navi-item" @click="readingQrCode" :class="{ disable: !memberId }">ポイントを<br>貯める</div>
-            <div class="navi-item" :class="{ disable: !memberId }">ポイントを使う</div>
+            <div class="navi-item" @click="readingQrCode">ポイントを<br>貯める</div>
+            <div class="navi-item">ポイントを使う</div>
         </div>
-        <div>test:{{ test }}</div>
-        <div class="qr-code">
-            <p>lineProfile:{{ lineProfile }}</p>
-            <p>token:{{ token }}</p>
-        </div>
-        <ConnectConfirm @connectFlag="fetchMemberData" v-if="confirmModal01"></ConnectConfirm>
+        <ConnectConfirm v-model="modalFlag" v-if="modalFlag" @formData="connectMember"></ConnectConfirm>
     </div>
 </template>
 
@@ -36,13 +26,8 @@ import axios from 'axios'
 export default {
     data() {
         return {
-            test: null,
+            modalFlag: false,
             point: 0,
-            qrResult: null,
-            qrError: null,
-            confirmModal01: false,
-            responseProfile: { name: 'tomohiko Aoki', email: 'aoki@ton-q.com' },
-            responseMemberData: { point: 500, user_id: 'heartfull' }
         }
     },
     components: {
@@ -55,50 +40,33 @@ export default {
             lineProfile: 'getProfile',
         }),
     },
-    watch: {
-        lineProfile(val) {
-            if (val) {
-                this.confirmModal01 = true
-            }
-        },
-        async qrResult(val) {
-            if (val) {
-                const response = await axios.get('https://sysf.heartful.work/epoints/add/12157/122487/250/135465/add')
-                this.test = response.data
-                this.point = response.data.totalPoints
-            }
-        }
-    },
     methods: {
-        async fetchMemberData() {
-            // this.tokenを送る
-            //　const response = await axios.post('https://sysf.heartful.work/epoints/add/12157/122487/250/135465/add')
-
-            this.confirmModal01 = false
+        async connectMember(formData) {
+            this.modalFlag = false
             $nuxt.$loading.start();
+            // formDataのメールアドレスとパスワードを送る
+            const response = await axios.get('https://sysf.heartful.work/epoints/add/12157/122487/250/135465/add')
 
-            const response = await new Promise(resolve => setTimeout(() => {
-                resolve(this.responseMemberData)
-            }, 1000))
-
-            if (response) {
-                this.point = response.point
-                this.$store.dispatch('setMemberId', response.user_id)
+            // 紐づけされていた場合は、ポイントとuser_idを返却
+            if (response.status === 200) {
+                this.point = response.data.totalPoints
+                this.$store.dispatch('setMemberId', response.data.userId)
 
                 $nuxt.$loading.finish();
-
                 return
             }
 
-
-
+            $nuxt.$loading.finish();
         },
+        // QRコードリーダー
         readingQrCode() {
-            this.qrResult = null
-            if (!this.memberId) return false
+            $nuxt.$loading.start();
             liff.scanCodeV2()
                 .then((result) => {
-                    this.qrResult = result
+                    return axios.get('https://sysf.heartful.work/epoints/add/12157/122487/250/135465/add')
+                }).then((response) => {
+                    this.test = response.data
+                    this.point = response.data.totalPoints
                 })
                 .catch((err) => {
                     this.qrError = err;
@@ -109,15 +77,28 @@ export default {
     mounted() {
         this.$liffInit
             .then(() => {
-                const token = liff.getAccessToken();
+                const token = liff.getIDToken();
                 const profileData = liff.getDecodedIDToken()
+                //storeにLINEのtokenとprofileを保存
                 this.$store.dispatch('setToken', token)
-                this.$store.dispatch('setProfile', profileData)
+                this.$store.dispatch('setProfile', this.responseProfile)
+                // 最初のハートフルサーバーへのアクセス
+                // LINEのIDで紐づけできるか確認してもらう
+                // 紐づけされている場合は、ポイントとuser_idを返却
+                // 紐づけされていない場合は、何もなし(LINEのIDはサーバーに保存してもらう)
+                return axios.get('https://sysf.heartful.work/epoints/add/12157/0/135465/0/add')
+
+            }).then((response) => {
+                // 返ってきたデータからpointは表示, user_idはstoreに保存
+                // 紐づけがない場合は、user_idはfalseからnullに、ポイントは0
+                // 手動で紐付けを則すためのモーダルを開く
+                // this.test = response
+                this.point = response.data.totalPoints ?? 0
+                this.$store.dispatch('setMemberId', null)
+                this.modalFlag = true
             })
             .catch((error) => {
                 this.liffError = error;
-                // const profileData = this.responseProfile
-                // this.$store.dispatch('setProfile', profileData)
             });
     },
 }
@@ -195,10 +176,6 @@ export default {
     }
 }
 
-.test {
-    text-align: center;
-}
-
 .btn {
     display: block;
     width: 100px;
@@ -209,31 +186,6 @@ export default {
     border-radius: 10px;
     color: #fff;
     font-weight: bold;
-}
-
-.qr-code {
-    p {
-        margin: 20px auto;
-        width: 90%;
-    }
-}
-
-.profile {
-    width: 90%;
-    margin: 30px auto;
-
-    .profile-name {
-        text-align: center;
-        font-weight: bold;
-        margin: 10px;
-    }
-
-    .profile-picture {
-        img {
-            width: 100%;
-            height: auto;
-        }
-    }
 }
 </style>
 

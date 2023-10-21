@@ -1,23 +1,29 @@
 <template>
     <div class="modal-container">
         <div class="modal-content">
-            <div>
-                このアプリを利用するにはメールアドレスでのハートフル会員との紐づけが必要です。
-                <br>
-                <form class="form">
-                    <div class="form-group">
-                        <label>メールアドレス</label>
-                        <div class="form-content">
-                            <input class="input-text" :value="profile.email">
-                        </div>
+            <p>
+                以前にハートフル会員にご登録頂いている場合は、データの紐づけが必要です。
+                下記にご登録いただいたメールアドレスとパスワードを入力し、送信してください。
+            </p>
+            <form class="form">
+                <div class="form-group">
+                    <label>メールアドレス</label>
+                    <div class="form-content">
+                        <input class="input-text" v-model="formData.email" type="email">
                     </div>
-                </form>
-                <br>
-                <button @click="ok" class="btn">許可する</button>
-            </div>
+                </div>
+                <div class="form-group">
+                    <label>パスワード</label>
+                    <div class="form-content">
+                        <input class="input-text" v-model="formData.password">
+                    </div>
+                </div>
+                <button @click="connect" class="btn">送信</button>
+            </form>
+            <br>
             <div class="register">
-                ハートフル会員にまだご登録頂いていない方は、こちらより新規でご登録ください。
-                <button @click="ok" class="btn"><nuxt-link to="/register">新規登録</nuxt-link></button>
+                このまま利用する場合は閉じるを押してください。
+                <button @click="close" class="btn">閉じる</button>
             </div>
         </div>
     </div>
@@ -27,9 +33,20 @@
 import { mapGetters } from 'vuex'
 
 export default {
+    data() {
+        return {
+            formData: {
+                email: '',
+                password: '',
+            }
+        }
+    },
     methods: {
-        ok() {
-            this.$emit('connectFlag', true)
+        connect() {
+            this.$emit('formData', this.formData)
+        },
+        close() {
+            this.$emit('input', false)
         }
     },
     computed: {
@@ -52,8 +69,8 @@ export default {
     .modal-content {
         position: absolute;
         padding: 2em 1em;
-        width: 80%;
-        height: 70%;
+        width: 90%;
+        height: 80%;
         background-color: #fff;
         top: 50%;
         left: 50%;
