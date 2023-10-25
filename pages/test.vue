@@ -13,12 +13,16 @@
             <div class="navi-item" @click="readingQrCode">ポイントを<br>貯める</div>
             <div class="navi-item">ポイントを使う</div>
         </div>
+        <div class="test">
+            <p>{{ token }}</p>
+        </div>
         <ConnectConfirm v-model="modalFlag" v-if="modalFlag" @formData="connectMember"></ConnectConfirm>
     </div>
 </template>
 
 <script>
 import ConnectConfirm from '../components/Modal/ConnectConfirm.vue'
+import crypto from 'crypto';
 
 import { mapGetters } from 'vuex'
 import axios from 'axios'
@@ -44,17 +48,37 @@ export default {
         async connectMember(formData) {
             this.modalFlag = false
             $nuxt.$loading.start();
-            // formDataのメールアドレスとパスワードを送る
-            const response = await axios.get('https://sysf.heartful.work/epoints/add/12157/122487/250/135465/add')
 
-            // 紐づけされていた場合は、ポイントとuser_idを返却
-            if (response.status === 200) {
-                this.point = response.data.totalPoints
-                this.$store.dispatch('setMemberId', response.data.userId)
+            const lineToken = liff.getIDToken()
+            formData['line_id'] = this.token
 
-                $nuxt.$loading.finish();
-                return
+            const currentDate = new Date().toISOString().split('T')[0]
+            const string = currentDate + 'tsuchiura8888'
+
+            const apiKey = crypto.createHash('md5').update(string).digest('hex')
+            console.log(apiKey);
+
+            try {
+                const response = await axios.get(`https://sysf.heartful.work/epoints/linkmember?email=test@example.com&password=YourPassword&id=123`, {
+                    headers: {
+                        'API-Key': `${apiKey}`
+                    }
+                })
+
+                console.log(response.data)
+
+                // 紐づけされていた場合は、ポイントとuser_idを返却
+                if (response.status === 200) {
+                    this.point = response.data.totalPoints
+                    this.$store.dispatch('setMemberId', response.data.userId)
+
+                    $nuxt.$loading.finish();
+                    return
+                }
+            } catch (err) {
+                console.log(err)
             }
+
 
             $nuxt.$loading.finish();
         },
@@ -186,6 +210,15 @@ export default {
     border-radius: 10px;
     color: #fff;
     font-weight: bold;
+}
+
+.test {
+    width: 100%;
+
+    p {
+        width: 90%;
+        margin: 0 auto;
+    }
 }
 </style>
 

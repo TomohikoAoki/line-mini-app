@@ -9,7 +9,7 @@
                 <div class="form-group">
                     <label>メールアドレス</label>
                     <div class="form-content">
-                        <input class="input-text" v-model="formData.email" type="email">
+                        <input class="input-text" v-model="formData.usrmail" type="email">
                     </div>
                 </div>
                 <div class="form-group">
@@ -36,7 +36,7 @@ export default {
     data() {
         return {
             formData: {
-                email: '',
+                usrmail: '',
                 password: '',
             }
         }
