@@ -14,15 +14,21 @@
             <div class="navi-item">ポイントを使う</div>
         </div>
         <div class="test">
-            <p>{{ token }}</p>
+            <p>response:{{ response }}</p>
+            <p>email: {{ email }}</p>
+            <p>name: {{ name }}</p>
+            <p>test: {{ modalFlag }}</p>
         </div>
         <ConnectConfirm v-model="modalFlag" v-if="modalFlag" @formData="connectMember"></ConnectConfirm>
+        <Transition name="fade">
+            <FlashMessage v-if="message" @close="closeMessage">{{ message }}</FlashMessage>
+        </Transition>
     </div>
 </template>
 
 <script>
 import ConnectConfirm from '../components/Modal/ConnectConfirm.vue'
-import crypto from 'crypto';
+import FlashMessage from '../components/Modal/FlashMessage.vue'
 
 import { mapGetters } from 'vuex'
 import axios from 'axios'
@@ -32,98 +38,169 @@ export default {
         return {
             modalFlag: false,
             point: 0,
+            message: null,
+            response: null,
+            email: null,
+            name: null,
+            test: null,
         }
     },
     components: {
         ConnectConfirm,
+        FlashMessage
     },
     computed: {
         ...mapGetters({
             token: "getToken",
-            memberId: 'getMemberId',
+            member: 'getMember',
             lineProfile: 'getProfile',
         }),
     },
+    watch: {
+        async token(val) {
+            if (val) {
+                $nuxt.$loading.start();
+                this.test = val
+                const response = await axios.post('https://tonq.net/api/heartful/first', { 'line_token': this.token }, {
+                    headers: {
+                        Authorization: "ApiToken ymEYCBC4BjxjxAhvgUF2TLCqRmYtwXaNKjwSbwjv",
+                    }
+                })
+
+                // @response {status:int, data:{object}}
+                // 返ってきたデータからpointは表示, member情報はstoreに保存
+                // 参照データがない場合は、新しく会員情報を作って返ってくる(member_idとline_idの紐づけだけされている)
+                this.response = response.data
+                this.point = response.data.data.point ?? 0
+                this.$store.dispatch('setMember', response.data.data)
+
+                this.email = response.data.data.email
+                this.name = response.data.data.name
+
+                // データにmailがない場合は初めてのアクセス or 紐づけされていないと判断
+                // 手動で紐付けを則すためのモーダルを開く
+                if (response.data.data.email === null) {
+
+                    this.modalFlag = true
+                }
+                $nuxt.$loading.finish();
+            }
+        }
+    },
     methods: {
+        // LINE_IDと会員情報の紐づけ
+        // modalからのformDataのemitで開始
         async connectMember(formData) {
             this.modalFlag = false
             $nuxt.$loading.start();
 
-            const lineToken = liff.getIDToken()
-            formData['line_id'] = this.token
+            formData['member_id'] = this.member.member_id
 
-            const currentDate = new Date().toISOString().split('T')[0]
-            const string = currentDate + 'tsuchiura8888'
-
-            const apiKey = crypto.createHash('md5').update(string).digest('hex')
-            console.log(apiKey);
-
+            // 送信 {usrmail:string, password:string, member_id,string}
             try {
-                const response = await axios.get(`https://sysf.heartful.work/epoints/linkmember?email=test@example.com&password=YourPassword&id=123`, {
+                const response = await axios.post('https://tonq.net/api/heartful/connect', formData, {
                     headers: {
-                        'API-Key': `${apiKey}`
+                        Authorization: "ApiToken ymEYCBC4BjxjxAhvgUF2TLCqRmYtwXaNKjwSbwjv",
                     }
                 })
 
-                console.log(response.data)
-
-                // 紐づけされていた場合は、ポイントとuser_idを返却
+                // response {status:int,data:{object}}
+                // 紐づけできた場合は、ポイントとmemberを更新
                 if (response.status === 200) {
-                    this.point = response.data.totalPoints
-                    this.$store.dispatch('setMemberId', response.data.userId)
+                    this.point = response.data.data.point
+                    this.$store.dispatch('setMember', response.data)
 
                     $nuxt.$loading.finish();
+
+                    // 表示 紐づけが完了しました
+                    this.message = '紐づけが完了しました'
+
                     return
                 }
+                if (response.status === 404) {
+                    // 表示 情報が見つかりませんでした
+                    this.message = '情報が見つかりませんでした'
+                }
             } catch (err) {
+                // サーバー側のエラー
                 console.log(err)
             }
-
-
             $nuxt.$loading.finish();
         },
-        // QRコードリーダー
+        // point送信関数
+        async sendPoint(result) {
+            const response = await axios.post('https://tonq.net/api/heartful/point/add', result, {
+                headers: {
+                    Authorization: "ApiToken ymEYCBC4BjxjxAhvgUF2TLCqRmYtwXaNKjwSbwjv",
+                }
+            })
+            this.response = response
+            return response
+        },
+        // QRコードリーダー起動 & ポイント送信
         readingQrCode() {
             $nuxt.$loading.start();
             liff.scanCodeV2()
                 .then((result) => {
-                    return axios.get('https://sysf.heartful.work/epoints/add/12157/122487/250/135465/add')
-                }).then((response) => {
-                    this.test = response.data
-                    this.point = response.data.totalPoints
+                    // result:QRコードからの情報 {value:{point:int,code_id:any,user_id:string,exp:int}}
+                    // codeIDで連続の使用を防ぐ
+                    let value = JSON.parse(result.value)
+
+                    // ここに使用期限が切れていないかのチェックいれる
+                    const date = new Date()
+                    const time = date.getTime()
+
+                    this.result = value
+                    this.exp = value.exp
+                    this.time = time
+
+                    // 切れている場合は表示
+                    if (value.exp < time) {
+                        this.message = '有効期限が切れています'
+                        return false
+                    }
+
+                    // userID,point,codeIDを送信
+                    value['member_id'] = this.member.member_id
+                    return this.sendPoint(value)
+                })
+                .then((response) => {
+                    this.$store.dispatch('setMember', response.data.data)
+                    this.point = response.data.data.point
+                    // 表示 成功した
+                    this.message = 'ポイントが加算されました'
                 })
                 .catch((err) => {
+                    // どうするか？？？？
                     this.qrError = err;
                 });
             $nuxt.$loading.finish();
+        },
+        closeMessage() {
+            this.message = null
         }
     },
     mounted() {
+        // 初期化
         this.$liffInit
             .then(() => {
                 const token = liff.getIDToken();
+                // テスト用
+                //const token = 'eyJraWQiOiI2YWE4YWQwN2NkMmFhYWRjYzY1NmY3ZTIxMzljY2U4YjhjNGE2YzgxYzI5MDQyZjQ4MTY4MDY3MmZkMDNjOTY5IiwidHlwIjoiSldUIiwiYWxnIjoiRVMyNTYifQ.eyJpc3MiOiJodHRwczovL2FjY2Vzcy5saW5lLm1lIiwic3ViIjoiVTFlMDAyNDUwNTc3ZDFiMjVlMDNiZmE2M2FlZGMzOWVlIiwiYXVkIjoiMjAwMTA2MTYzNyIsImV4cCI6MTY5ODExODA0MCwiaWF0IjoxNjk4MTE0NDQwLCJuYW1lIjoiVG9tb2hpa28gIEFva2kiLCJwaWN0dXJlIjoiaHR0cHM6Ly9wcm9maWxlLmxpbmUtc2Nkbi5uZXQvMGh2UzB0dnY4N0tYd05EUVY4dl9OV0t6RklKeEY2SXk4MGRXbGtIeW9OZmtra09HbF9OV2t6SFN3UGRVOGtPV2NvTnpoaUdpRllmazUxIn0.PzXC01jUWn0cYshIK2pJxem-shHZbdCtepj4y5TO5EKN7gw5nqz1rKPLGGfJ9GGyYdWFNDlGv-bUguvNCfFBJw'
+
                 const profileData = liff.getDecodedIDToken()
+
                 //storeにLINEのtokenとprofileを保存
                 this.$store.dispatch('setToken', token)
                 this.$store.dispatch('setProfile', this.responseProfile)
-                // 最初のハートフルサーバーへのアクセス
-                // LINEのIDで紐づけできるか確認してもらう
-                // 紐づけされている場合は、ポイントとuser_idを返却
-                // 紐づけされていない場合は、何もなし(LINEのIDはサーバーに保存してもらう)
-                return axios.get('https://sysf.heartful.work/epoints/add/12157/0/135465/0/add')
 
-            }).then((response) => {
-                // 返ってきたデータからpointは表示, user_idはstoreに保存
-                // 紐づけがない場合は、user_idはfalseからnullに、ポイントは0
-                // 手動で紐付けを則すためのモーダルを開く
-                // this.test = response
-                this.point = response.data.totalPoints ?? 0
-                this.$store.dispatch('setMemberId', null)
-                this.modalFlag = true
+
+            }).catch((error) => {
+                // どうしようもないのでエラーページに飛ばす
+                this.error = error
+                console.log(error)
             })
-            .catch((error) => {
-                this.liffError = error;
-            });
+
     },
 }
 
@@ -219,6 +296,34 @@ export default {
         width: 90%;
         margin: 0 auto;
     }
+}
+
+.fade-enter {
+    /*開始の状態を指定する*/
+    opacity: 0;
+    transform: translateY(-20px);
+}
+
+.fade-enter-to {
+    /*終了の状態を指定する*/
+    opacity: 1;
+}
+
+.fade-enter-active {
+    /*動作（イージングや時間）を指定する*/
+    transition: opacity 250ms ease-out, transform 250ms ease-out;
+}
+
+.fade-leave {
+    opacity: 1;
+}
+
+.fade-leave-to {
+    opacity: 0;
+}
+
+.fade-leave-active {
+    transition: opacity 250ms ease-out;
 }
 </style>
 

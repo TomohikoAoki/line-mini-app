@@ -1,34 +1,51 @@
 <template>
     <div class="register">
-        <h1 class="register-title">会員登録</h1>
-        <div class="kiyaku">
-            <h2 class="kiyaku-title">規約</h2>
-            <ul class="kiyaku-content">
-                <li>規約はうんたらかんたら規約はうんたらかんたら規約はうんたらかんたら規約はうんたらかんたら。</li>
-                <li>規約はうんたらかんたら規約はうんたらかんたら規約はうんたらかんたら規約はうんたらかんたら。</li>
-                <li>規約はうんたらかんたら規約はうんたらかんたら規約はうんたらかんたら規約はうんたらかんたら。</li>
-                <li>規約はうんたらかんたら規約はうんたらかんたら規約はうんたらかんたら規約はうんたらかんたら。</li>
-                <li>規約はうんたらかんたら規約はうんたらかんたら規約はうんたらかんたら規約はうんたらかんたら。</li>
-                <li>規約はうんたらかんたら規約はうんたらかんたら規約はうんたらかんたら規約はうんたらかんたら。</li>
-            </ul>
-        </div>
+        <h1 class="register-title">テスト会員登録ページ</h1>
+        <p>ここは実際にはアプリには実装されない。<br>他のところで会員登録した場合をシミュレーションするためのページ</p>
         <form class="form">
             <div class="form-group">
                 <label>お名前</label>
                 <div class="form-content">
-                    <input class="input-text">
+                    <input class="input-text" v-model="formData.name">
                 </div>
             </div>
             <div class="form-group">
                 <label>メールアドレス</label>
                 <div class="form-content">
-                    <input class="input-text">
+                    <input class="input-text" v-model="formData.email">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>パスワード</label>
+                <div class="form-content">
+                    <input class="input-text" v-model="formData.password">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>ポイント</label>
+                <div class="form-content">
+                    <input class="input-text" v-model="formData.point">
                 </div>
             </div>
             <div class="btn submit">送信</div>
         </form>
     </div>
 </template>
+
+<script>
+export default {
+    data() {
+        return {
+            formData: {
+                name: null,
+                email: null,
+                point: null,
+                password: null
+            }
+        }
+    }
+}
+</script>
 
 <style lang="scss">
 .register {

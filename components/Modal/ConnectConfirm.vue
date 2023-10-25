@@ -15,10 +15,12 @@
                 <div class="form-group">
                     <label>パスワード</label>
                     <div class="form-content">
-                        <input class="input-text" v-model="formData.password">
+                        <input class="input-text" v-model="formData.password" type="password">
                     </div>
                 </div>
-                <button @click="connect" class="btn">送信</button>
+                <button @click.prevent="connect" class="btn">
+                    確認
+                </button>
             </form>
             <br>
             <div class="register">
@@ -30,7 +32,27 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+// import { ValidationProvider, extend, ValidationObserver, localize } from 'vee-validate/dist/vee-validate'
+// import { required, email, alpha_num } from 'vee-validate/dist/rules'
+// import ja from 'vee-validate/dist/locale/ja.json'
+
+// extend('required', required);
+// extend('email', email)
+// extend('alpha_num', alpha_num)
+
+// localize('ja', ja)
+// localize({
+//     ja: {
+//         names: {
+//             email: 'メールアドレス',
+//             password: 'パスワード',
+//         },
+//         messages: {
+//             email: 'メールアドレスの形式が有効でありません。',
+//             alpha_num: '半角英数字で入力してください。'
+//         }
+//     },
+// })
 
 export default {
     data() {
@@ -41,6 +63,10 @@ export default {
             }
         }
     },
+    // components: {
+    //     ValidationProvider,
+    //     ValidationObserver,
+    // },
     methods: {
         connect() {
             this.$emit('formData', this.formData)
@@ -49,11 +75,6 @@ export default {
             this.$emit('input', false)
         }
     },
-    computed: {
-        ...mapGetters({
-            profile: 'getProfile'
-        })
-    }
 }
 </script>
 
@@ -64,6 +85,7 @@ export default {
     left: 0;
     width: 100vw;
     height: 100vh;
+    z-index: 100;
     background-color: rgba(0, 0, 0, 0.3);
 
     .modal-content {
@@ -85,6 +107,10 @@ export default {
 .btn {
     display: block;
     margin: 10% auto;
+
+    &.disable {
+        opacity: 0.2;
+    }
 }
 
 .form {
@@ -98,6 +124,7 @@ export default {
 
         .form-content {
             .input-text {
+                display: block;
                 border: 1px solid #b7b7b7;
                 width: 100%;
                 height: 3em;
