@@ -14,10 +14,11 @@
             <div class="navi-item">ポイントを使う</div>
         </div>
         <div class="test">
-            <p>response:{{ response }}</p>
-            <p>email: {{ email }}</p>
-            <p>name: {{ name }}</p>
-            <p>test: {{ modalFlag }}</p>
+            <p>member:{{ member }}</p>
+            <p>result: {{ result }}</p>
+            <p>response: {{ response }}</p>
+            <p>exp: {{ exp }}</p>
+            <p>qrError: {{ qrError }}</p>
         </div>
         <ConnectConfirm v-model="modalFlag" v-if="modalFlag" @formData="connectMember"></ConnectConfirm>
         <Transition name="fade">
@@ -43,6 +44,10 @@ export default {
             email: null,
             name: null,
             test: null,
+            result: null,
+            time: null,
+            exp: null,
+            qrError: null
         }
     },
     components: {
@@ -70,12 +75,8 @@ export default {
                 // @response {status:int, data:{object}}
                 // 返ってきたデータからpointは表示, member情報はstoreに保存
                 // 参照データがない場合は、新しく会員情報を作って返ってくる(member_idとline_idの紐づけだけされている)
-                this.response = response.data
                 this.point = response.data.data.point ?? 0
                 this.$store.dispatch('setMember', response.data.data)
-
-                this.email = response.data.data.email
-                this.name = response.data.data.name
 
                 // データにmailがない場合は初めてのアクセス or 紐づけされていないと判断
                 // 手動で紐付けを則すためのモーダルを開く
@@ -108,7 +109,7 @@ export default {
                 // 紐づけできた場合は、ポイントとmemberを更新
                 if (response.status === 200) {
                     this.point = response.data.data.point
-                    this.$store.dispatch('setMember', response.data)
+                    this.$store.dispatch('setMember', response.data.data)
 
                     $nuxt.$loading.finish();
 
@@ -150,10 +151,6 @@ export default {
                     const date = new Date()
                     const time = date.getTime()
 
-                    this.result = value
-                    this.exp = value.exp
-                    this.time = time
-
                     // 切れている場合は表示
                     if (value.exp < time) {
                         this.message = '有効期限が切れています'
@@ -165,6 +162,7 @@ export default {
                     return this.sendPoint(value)
                 })
                 .then((response) => {
+                    this.response = response
                     this.$store.dispatch('setMember', response.data.data)
                     this.point = response.data.data.point
                     // 表示 成功した
@@ -172,7 +170,7 @@ export default {
                 })
                 .catch((err) => {
                     // どうするか？？？？
-                    this.qrError = err;
+                    this.message = 'すでに使用されたクーポンです'
                 });
             $nuxt.$loading.finish();
         },

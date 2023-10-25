@@ -1,7 +1,7 @@
 const state = () => ({
   lineAccessToken: "token",
   profile: null,
-  memberId: false,
+  member: false,
 });
 
 const mutations = {
@@ -11,8 +11,8 @@ const mutations = {
   SET_PROFILE(state, value) {
     state.profile = value
   },
-  SET_MEMBER_ID(state, value) {
-    state.memberId = value
+  SET_MEMBER(state, value) {
+    state.member = value
   }
 };
 
@@ -23,15 +23,15 @@ const actions = {
   setProfile({commit}, value) {
     commit('SET_PROFILE', value)
   },
-  setMemberId({commit}, value) {
-    commit('SET_MEMBER_ID', value)
+  setMember({commit}, value) {
+    commit('SET_MEMBER', value)
   }
 };
 
 const getters = {
   getToken: (state) => state.lineAccessToken,
   getProfile: (state) => state.profile,
-  getMemberId: (state) => state.memberId,
+  getMember: (state) => state.member,
 };
 
 export default {
