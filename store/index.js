@@ -1,5 +1,5 @@
 const state = () => ({
-  lineAccessToken: "token",
+  lineAccessToken: "kjlkjlkjlklkjl",
   profile: null,
   member: false,
 });

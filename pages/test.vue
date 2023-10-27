@@ -14,11 +14,11 @@
             <div class="navi-item">ポイントを使う</div>
         </div>
         <div class="test">
-            <p>member:{{ member }}</p>
-            <p>result: {{ result }}</p>
             <p>response: {{ response }}</p>
-            <p>exp: {{ exp }}</p>
-            <p>qrError: {{ qrError }}</p>
+            <p>err: {{ err }}</p>
+            <p>IDToken:</p>
+            <p class="test">{{ token }}</p>
+            <div class="btn" @click="testApi">テスト</div>
         </div>
         <ConnectConfirm v-model="modalFlag" v-if="modalFlag" @formData="connectMember"></ConnectConfirm>
         <Transition name="fade">
@@ -47,7 +47,9 @@ export default {
             result: null,
             time: null,
             exp: null,
-            qrError: null
+            qrError: null,
+            qrValue: null,
+            err: null,
         }
     },
     components: {
@@ -62,29 +64,26 @@ export default {
         }),
     },
     watch: {
-        async token(val) {
+        token(val) {
             if (val) {
                 $nuxt.$loading.start();
-                this.test = val
-                const response = await axios.post('https://tonq.net/api/heartful/first', { 'line_token': this.token }, {
-                    headers: {
-                        Authorization: "ApiToken ymEYCBC4BjxjxAhvgUF2TLCqRmYtwXaNKjwSbwjv",
-                    }
-                })
+                axios.get(`https://sysf.heartful.work/epoints/verifyLineToken/?id_token=${this.token}`)
+                    .then((response) => {
+                        this.response = response.data
 
-                // @response {status:int, data:{object}}
-                // 返ってきたデータからpointは表示, member情報はstoreに保存
-                // 参照データがない場合は、新しく会員情報を作って返ってくる(member_idとline_idの紐づけだけされている)
-                this.point = response.data.data.point ?? 0
-                this.$store.dispatch('setMember', response.data.data)
+                        // this.point = response.data.data.point ?? 0
+                        // this.$store.dispatch('setMember', response.data.data)
 
-                // データにmailがない場合は初めてのアクセス or 紐づけされていないと判断
-                // 手動で紐付けを則すためのモーダルを開く
-                if (response.data.data.email === null) {
+                        $nuxt.$loading.finish();
+                    }).catch((err) => {
+                        this.err = err.response
 
-                    this.modalFlag = true
-                }
-                $nuxt.$loading.finish();
+                        if (err.response.status === 402) {
+                            this.modalFlag = true
+                        }
+                        // エラーの場合
+                        $nuxt.$loading.finish();
+                    })
             }
         }
     },
@@ -95,37 +94,42 @@ export default {
             this.modalFlag = false
             $nuxt.$loading.start();
 
-            formData['member_id'] = this.member.member_id
-
             // 送信 {usrmail:string, password:string, member_id,string}
-            try {
-                const response = await axios.post('https://tonq.net/api/heartful/connect', formData, {
-                    headers: {
-                        Authorization: "ApiToken ymEYCBC4BjxjxAhvgUF2TLCqRmYtwXaNKjwSbwjv",
-                    }
-                })
-
-                // response {status:int,data:{object}}
-                // 紐づけできた場合は、ポイントとmemberを更新
-                if (response.status === 200) {
-                    this.point = response.data.data.point
-                    this.$store.dispatch('setMember', response.data.data)
-
-                    $nuxt.$loading.finish();
-
-                    // 表示 紐づけが完了しました
-                    this.message = '紐づけが完了しました'
-
-                    return
+            await fetch(`https://uranai.heartf.com/Public/epoints/linkmember/?usrmail=${formData.usrmail}&password=${formData.password}`, {
+                method: 'GET'
+            }).then(response => {
+                if (!response.ok) {
+                    console.error('response.ok:', response.ok);
+                    console.error('esponse.status:', response.status);
+                    console.error('esponse.statusText:', response.statusText);
+                    throw new Error(response.statusText);
                 }
-                if (response.status === 404) {
-                    // 表示 情報が見つかりませんでした
-                    this.message = '情報が見つかりませんでした'
-                }
-            } catch (err) {
-                // サーバー側のエラー
-                console.log(err)
-            }
+                // ここに成功時の処理を記述
+            })
+                .catch(error => {
+                    // ネットワークエラーでも !response.ok でもここで処理できる
+                    console.error('エラーが発生しました', error);
+                });
+
+            // response {status:int,data:{object}}
+            // 紐づけできた場合は、ポイントとmemberを更新
+            // if (response.status === 200) {
+            //     //this.point = response.data.data.point
+            //     //this.$store.dispatch('setMember', response.data.data)
+
+            //     // 表示 紐づけが完了しました
+            //     this.message = '紐づけが完了しました'
+
+            // }
+            // else if (response.status === 401) {
+            //     // 表示 情報が見つかりませんでした
+            //     this.message = '情報が見つかりませんでした。'
+            // }
+            // else {
+            //     // 表示 情報が見つかりませんでした
+            //     this.message = '値が不正です'
+            // }
+
             $nuxt.$loading.finish();
         },
         // point送信関数
@@ -134,7 +138,7 @@ export default {
                 headers: {
                     Authorization: "ApiToken ymEYCBC4BjxjxAhvgUF2TLCqRmYtwXaNKjwSbwjv",
                 }
-            })
+            }).catch(err => err.response)
             this.response = response
             return response
         },
@@ -145,29 +149,31 @@ export default {
                 .then((result) => {
                     // result:QRコードからの情報 {value:{point:int,code_id:any,user_id:string,exp:int}}
                     // codeIDで連続の使用を防ぐ
-                    let value = JSON.parse(result.value)
+                    //let value = JSON.parse(result.value)
+
+                    this.qrValue = result
 
                     // ここに使用期限が切れていないかのチェックいれる
                     const date = new Date()
                     const time = date.getTime()
 
                     // 切れている場合は表示
-                    if (value.exp < time) {
-                        this.message = '有効期限が切れています'
-                        return false
-                    }
+                    // if (value.exp < time) {
+                    //     this.message = '有効期限が切れています'
+                    //     return false
+                    // }
 
                     // userID,point,codeIDを送信
-                    value['member_id'] = this.member.member_id
-                    return this.sendPoint(value)
+                    // value['member_id'] = this.member.member_id
+                    // return this.sendPoint(value)
                 })
-                .then((response) => {
-                    this.response = response
-                    this.$store.dispatch('setMember', response.data.data)
-                    this.point = response.data.data.point
-                    // 表示 成功した
-                    this.message = 'ポイントが加算されました'
-                })
+                // .then((response) => {
+                //     this.response = response
+                //     this.$store.dispatch('setMember', response.data.data)
+                //     this.point = response.data.data.point
+                //     // 表示 成功した
+                //     this.message = 'ポイントが加算されました'
+                // })
                 .catch((err) => {
                     // どうするか？？？？
                     this.message = 'すでに使用されたクーポンです'
@@ -176,6 +182,11 @@ export default {
         },
         closeMessage() {
             this.message = null
+        },
+        async testApi() {
+            const response = await axios.get(`https://sysf.heartful.work/epoints/verifyLineToken/?id_token=eyJraWQiOiJlNmE2OTE5Mzg2MTY5YmE1NGRlOWRkMzM2YjQxNDc5YTAxMDEyZGMwYzQyOGJhYWUyZGUxOGU1OWVlMjE0NmRiIiwidHlwIjoiSldUIiwiYWxnIjoiRVMyNTYifQ.eyJpc3MiOiJodHRwczovL2FjY2Vzcy5saW5lLm1lIiwic3ViIjoiVTFlMDAyNDUwNTc3ZDFiMjVlMDNiZmE2M2FlZGMzOWVlIiwiYXVkIjoiMjAwMTA2MTYzNyIsImV4cCI6MTY5ODQwMzk2NCwiaWF0IjoxNjk4NDAwMzY0LCJuYW1lIjoiVG9tb2hpa28gIEFva2kiLCJwaWN0dXJlIjoiaHR0cHM6Ly9wcm9maWxlLmxpbmUtc2Nkbi5uZXQvMGh2UzB0dnY4N0tYd05EUVY4dl9OV0t6RklKeEY2SXk4MGRXbGtIeW9OZmtra09HbF9OV2t6SFN3UGRVOGtPV2NvTnpoaUdpRllmazUxIn0.-GdMPq0XAHpO-MwUEWvdB2hIc61Xt9VtPjHTKnH_NXO4_LtzJC5LqvfivcZdAOhTqfSO-25C164Ruqs5Xc-0yQ`).catch((err) => err.response)
+
+            this.response = response
         }
     },
     mounted() {
@@ -183,20 +194,15 @@ export default {
         this.$liffInit
             .then(() => {
                 const token = liff.getIDToken();
-                // テスト用
-                //const token = 'eyJraWQiOiI2YWE4YWQwN2NkMmFhYWRjYzY1NmY3ZTIxMzljY2U4YjhjNGE2YzgxYzI5MDQyZjQ4MTY4MDY3MmZkMDNjOTY5IiwidHlwIjoiSldUIiwiYWxnIjoiRVMyNTYifQ.eyJpc3MiOiJodHRwczovL2FjY2Vzcy5saW5lLm1lIiwic3ViIjoiVTFlMDAyNDUwNTc3ZDFiMjVlMDNiZmE2M2FlZGMzOWVlIiwiYXVkIjoiMjAwMTA2MTYzNyIsImV4cCI6MTY5ODExODA0MCwiaWF0IjoxNjk4MTE0NDQwLCJuYW1lIjoiVG9tb2hpa28gIEFva2kiLCJwaWN0dXJlIjoiaHR0cHM6Ly9wcm9maWxlLmxpbmUtc2Nkbi5uZXQvMGh2UzB0dnY4N0tYd05EUVY4dl9OV0t6RklKeEY2SXk4MGRXbGtIeW9OZmtra09HbF9OV2t6SFN3UGRVOGtPV2NvTnpoaUdpRllmazUxIn0.PzXC01jUWn0cYshIK2pJxem-shHZbdCtepj4y5TO5EKN7gw5nqz1rKPLGGfJ9GGyYdWFNDlGv-bUguvNCfFBJw'
-
                 const profileData = liff.getDecodedIDToken()
 
                 //storeにLINEのtokenとprofileを保存
                 this.$store.dispatch('setToken', token)
-                this.$store.dispatch('setProfile', this.responseProfile)
+                this.$store.dispatch('setProfile', profileData)
 
 
             }).catch((error) => {
-                // どうしようもないのでエラーページに飛ばす
                 this.error = error
-                console.log(error)
             })
 
     },
@@ -288,12 +294,9 @@ export default {
 }
 
 .test {
-    width: 100%;
-
-    p {
-        width: 90%;
-        margin: 0 auto;
-    }
+    width: 90%;
+    margin: 0 auto;
+    overflow-wrap: break-word;
 }
 
 .fade-enter {
