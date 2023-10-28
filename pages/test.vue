@@ -14,11 +14,8 @@
             <div class="navi-item">ポイントを使う</div>
         </div>
         <div class="test">
-            <p>response: {{ response }}</p>
-            <p>err: {{ err }}</p>
-            <p>IDToken:</p>
-            <p class="test">{{ token }}</p>
-            <div class="btn" @click="testApi">テスト</div>
+            <p><span class="labeel">response</span><br> {{ response }}</p>
+            <p><span class="labeel">err</span><br>{{ err }}</p>
         </div>
         <ConnectConfirm v-model="modalFlag" v-if="modalFlag" @formData="connectMember"></ConnectConfirm>
         <Transition name="fade">
@@ -64,24 +61,33 @@ export default {
         }),
     },
     watch: {
+        // storeのtokenの監視
         token(val) {
+            // storeのtokenが変化して存在してたら
             if (val) {
                 $nuxt.$loading.start();
+
+                // watchの中だからthen構文で
                 axios.get(`https://sysf.heartful.work/epoints/verifyLineToken/?id_token=${this.token}`)
                     .then((response) => {
                         this.response = response.data
 
                         // this.point = response.data.data.point ?? 0
                         // this.$store.dispatch('setMember', response.data.data)
+                        this.message = '会員情報との紐づけができました。'
 
                         $nuxt.$loading.finish();
                     }).catch((err) => {
-                        this.err = err.response
-
-                        if (err.response.status === 402) {
-                            this.modalFlag = true
+                        // 紐づけができなかった場合
+                        if (!err.response) {
+                            this.err = err
+                            this.message = 'ネットワークエラー。ステータスコード拾えない'
+                            $nuxt.$loading.finish();
+                            return false
                         }
-                        // エラーの場合
+                        this.err = err.response
+                        // ひもづけを行うためのモーダルオープン
+                        this.modalFlag = true
                         $nuxt.$loading.finish();
                     })
             }
@@ -95,40 +101,31 @@ export default {
             $nuxt.$loading.start();
 
             // 送信 {usrmail:string, password:string, member_id,string}
-            await fetch(`https://uranai.heartf.com/Public/epoints/linkmember/?usrmail=${formData.usrmail}&password=${formData.password}`, {
-                method: 'GET'
-            }).then(response => {
-                if (!response.ok) {
-                    console.error('response.ok:', response.ok);
-                    console.error('esponse.status:', response.status);
-                    console.error('esponse.statusText:', response.statusText);
-                    throw new Error(response.statusText);
-                }
-                // ここに成功時の処理を記述
-            })
-                .catch(error => {
-                    // ネットワークエラーでも !response.ok でもここで処理できる
-                    console.error('エラーが発生しました', error);
-                });
+            const response = await axios.get(`https://uranai.heartf.com/Public/epoints/linkmember/?usrmail=${formData.usrmail}&password=${formData.password}&id_token=${this.token}`)
+                .catch((err) => {
+                    //ネットワークエラーの場合はresponseがないので
+                    if (!err.response) {
+                        this.err = err
+                        this.message = 'ネットワークエラー。ステータスコード拾えない'
+                        return err
+                    }
+                    return err.response
+                })
 
-            // response {status:int,data:{object}}
-            // 紐づけできた場合は、ポイントとmemberを更新
-            // if (response.status === 200) {
-            //     //this.point = response.data.data.point
-            //     //this.$store.dispatch('setMember', response.data.data)
+            this.response = response.data
 
-            //     // 表示 紐づけが完了しました
-            //     this.message = '紐づけが完了しました'
+            // 紐づけできた場合は、ポイントを更新
+            if (response.status === 200) {
+                // this.point = response.data.data.point
 
-            // }
-            // else if (response.status === 401) {
-            //     // 表示 情報が見つかりませんでした
-            //     this.message = '情報が見つかりませんでした。'
-            // }
-            // else {
-            //     // 表示 情報が見つかりませんでした
-            //     this.message = '値が不正です'
-            // }
+                this.message = '紐づけが完了しました'
+            }
+            else if (response.status === 404) {
+                this.message = '情報が見つかりませんでした。'
+            }
+            else {
+                this.message = 'まだ設定していないエラーです'
+            }
 
             $nuxt.$loading.finish();
         },
@@ -183,11 +180,6 @@ export default {
         closeMessage() {
             this.message = null
         },
-        async testApi() {
-            const response = await axios.get(`https://sysf.heartful.work/epoints/verifyLineToken/?id_token=eyJraWQiOiJlNmE2OTE5Mzg2MTY5YmE1NGRlOWRkMzM2YjQxNDc5YTAxMDEyZGMwYzQyOGJhYWUyZGUxOGU1OWVlMjE0NmRiIiwidHlwIjoiSldUIiwiYWxnIjoiRVMyNTYifQ.eyJpc3MiOiJodHRwczovL2FjY2Vzcy5saW5lLm1lIiwic3ViIjoiVTFlMDAyNDUwNTc3ZDFiMjVlMDNiZmE2M2FlZGMzOWVlIiwiYXVkIjoiMjAwMTA2MTYzNyIsImV4cCI6MTY5ODQwMzk2NCwiaWF0IjoxNjk4NDAwMzY0LCJuYW1lIjoiVG9tb2hpa28gIEFva2kiLCJwaWN0dXJlIjoiaHR0cHM6Ly9wcm9maWxlLmxpbmUtc2Nkbi5uZXQvMGh2UzB0dnY4N0tYd05EUVY4dl9OV0t6RklKeEY2SXk4MGRXbGtIeW9OZmtra09HbF9OV2t6SFN3UGRVOGtPV2NvTnpoaUdpRllmazUxIn0.-GdMPq0XAHpO-MwUEWvdB2hIc61Xt9VtPjHTKnH_NXO4_LtzJC5LqvfivcZdAOhTqfSO-25C164Ruqs5Xc-0yQ`).catch((err) => err.response)
-
-            this.response = response
-        }
     },
     mounted() {
         // 初期化
@@ -202,6 +194,7 @@ export default {
 
 
             }).catch((error) => {
+                // どうしようもないからエラーページに飛ばす
                 this.error = error
             })
 
@@ -297,6 +290,13 @@ export default {
     width: 90%;
     margin: 0 auto;
     overflow-wrap: break-word;
+}
+
+.labeel {
+    display: inline-block;
+    padding: 0.5em;
+    background-color: rgb(69, 36, 36);
+    color: #fff;
 }
 
 .fade-enter {
