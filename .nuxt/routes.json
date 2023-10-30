@@ -1,0 +1,30 @@
+[
+  {
+    "name": "register",
+    "path": "/register",
+    "component": "C:\\\\lineminiapp_src\\\\line-mini-app\\\\pages\\\\register.vue",
+    "chunkName": "pages/register",
+    "_name": "_7b9e7189"
+  },
+  {
+    "name": "test",
+    "path": "/test",
+    "component": "C:\\\\lineminiapp_src\\\\line-mini-app\\\\pages\\\\test.vue",
+    "chunkName": "pages/test",
+    "_name": "_22e1e210"
+  },
+  {
+    "name": "testscan",
+    "path": "/testscan",
+    "component": "C:\\\\lineminiapp_src\\\\line-mini-app\\\\pages\\\\testscan.vue",
+    "chunkName": "pages/testscan",
+    "_name": "_59e3c216"
+  },
+  {
+    "name": "index",
+    "path": "/",
+    "component": "C:\\\\lineminiapp_src\\\\line-mini-app\\\\pages\\\\index.vue",
+    "chunkName": "pages/index",
+    "_name": "_07aee948"
+  }
+]
