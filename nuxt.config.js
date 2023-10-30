@@ -40,6 +40,21 @@ export default {
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {},
 
+  axios: {
+    proxy: true
+  },
+
+  proxy: {
+    '/api3/': {
+      target: 'https://sysf.heartful.work/epoints/',   //APIのURL
+      pathRewrite: { '^/api/': '' }
+    },
+    '/api2/': {
+      target: 'https://uranai.heartf.com/Public/',   //APIのURL
+      pathRewrite: { '^/api/': '' }
+    }
+  },
+
   env: {
     LIFF_ID: process.env.LIFF_ID,
   },

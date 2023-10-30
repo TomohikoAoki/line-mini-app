@@ -16,6 +16,7 @@
 
 <script>
 import packageJson from "../package.json";
+import crypto from "crypto";
 export default {
   data: function () {
     return {

@@ -9,16 +9,26 @@
                 <div class="form-group">
                     <label>メールアドレス</label>
                     <div class="form-content">
-                        <input class="input-text" v-model="formData.usrmail" type="email">
+                        <input class="input-text" v-model="formData.usrmail" type="email" @blur="fieldValidation('usrmail')"
+                            :class="{ valid: validation.usrmail, invalid: validation.usrmail === false }">
+                        <div class="error"><span v-if="validation.usrmail === false">{{
+                            validationMessage.usrmail[messageNumber] }}</span>
+                        </div>
+
                     </div>
                 </div>
                 <div class="form-group">
                     <label>パスワード</label>
                     <div class="form-content">
-                        <input class="input-text" v-model="formData.password" type="password">
+                        <input class="input-text" v-model="formData.password" type="password"
+                            @blur="fieldValidation('pass')"
+                            :class="{ valid: validation.password, invalid: validation.password === false }">
                     </div>
+                    <div class="error"><span v-if="validation.password === false">{{
+                        validationMessage.password[messageNumber] }}</span></div>
                 </div>
-                <button @click.prevent="connect" class="btn">
+                <button @click.prevent="connect" class="btn" :disabled="!validation.usrmail || !validation.password"
+                    :class="{ disable: !validation.usrmail || !validation.password }">
                     確認
                 </button>
             </form>
@@ -36,11 +46,26 @@
 export default {
     data() {
         return {
+            // 送信用 formData
             formData: {
                 usrmail: '',
                 password: '',
-            }
+            },
+            // validation flag
+            validation: {
+                usrmail: null,
+                password: null,
+            },
+            // validetion message
+            validationMessage: {
+                usrmail: ['必ず入力してください。', 'メールアドレスの形式が違います'],
+                password: ['必ず入力してください。', '半角英数字で入力してください。']
+            },
+            // messageのための番号
+            messageNumber: null
         }
+    },
+    computed: {
     },
     methods: {
         connect() {
@@ -48,6 +73,37 @@ export default {
         },
         close() {
             this.$emit('input', false)
+        },
+        // validation
+        fieldValidation(field) {
+            // validationの形式
+            const rgxMail = /^[a-zA-Z0-9_.+-]+@([a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]*\.)+[a-zA-Z]{2,}$/
+            const rgxPass = /^[0-9a-zA-Z]*$/
+            // validation
+            if (field === 'usrmail') {
+                // mail 空の場合
+                if (this.formData.usrmail === '') {
+                    this.messageNumber = 0
+                    this.validation.usrmail = false
+                    return
+                }
+                // mail 正規表現を合わない場合
+                this.messageNumber = 1
+                this.validation.usrmail = rgxMail.test(this.formData.usrmail)
+                return
+            }
+            if (field === 'pass') {
+                // password 空の場合
+                if (this.formData.password === '') {
+                    this.messageNumber = 0
+                    this.validation.password = false
+                    return
+                }
+                // password 正規表現を合わない場合
+                this.messageNumber = 1
+                this.validation.password = rgxPass.test(this.formData.password)
+                return
+            }
         }
     },
 }
@@ -103,12 +159,31 @@ export default {
                 border: 1px solid #b7b7b7;
                 width: 100%;
                 height: 3em;
+                padding: 0 1em;
                 border-radius: 10px;
+
+                &.valid {
+                    border-color: rgb(16, 138, 97);
+                }
+
+                &.invalid {
+                    border-color: rgb(138, 61, 16);
+                }
             }
         }
     }
 
 
+}
+
+.error {
+    font-size: 0.8em;
+    padding-top: 0.1em;
+    height: 1em;
+
+    span {
+        color: brown;
+    }
 }
 
 .btn {
