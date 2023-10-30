@@ -16,6 +16,8 @@
         <div class="test">
             <p><span class="labeel">response</span><br> {{ response }}</p>
             <p><span class="labeel">err</span><br>{{ err }}</p>
+            <p><span class="labeel">query</span><br>{{ query }}</p>
+            <p><span class="labeel">test</span><br>{{ test }}</p>
         </div>
         <ConnectConfirm v-model="modalFlag" v-if="modalFlag" @formData="connectMember"></ConnectConfirm>
         <Transition name="fade">
@@ -47,6 +49,7 @@ export default {
             qrError: null,
             qrValue: null,
             err: null,
+            query: null
         }
     },
     components: {
@@ -101,7 +104,7 @@ export default {
             $nuxt.$loading.start();
 
             // 送信 {usrmail:string, password:string, member_id,string}
-            const response = await axios.get(`https://uranai.heartf.com/Public/epoints/linkmember/?usrmail=${formData.usrmail}&password=${formData.password}&id_token=${this.token}`)
+            const response = await axios.get(`/api2/epoints/linkmember/?usrmail=${formData.usrmail}&password=${formData.password}&id_token=${this.token}`)
                 .catch((err) => {
                     //ネットワークエラーの場合はresponseがないので
                     if (!err.response) {
@@ -181,7 +184,28 @@ export default {
             this.message = null
         },
     },
-    mounted() {
+    async mounted() {
+        // line ブラウザ以外で表示した場合？？
+        if (this.$route.query.liffClientId) {
+            this.query = this.$route.query
+
+            let formData = new URLSearchParams()
+            formData.append('grant_type', 'authorization_code')
+            formData.append('code', `${this.$route.query.code}`)
+            formData.append('redirect_uri', `${this.$route.query.liffRedirectUri}`)
+            formData.append('client_id', `${this.$route.query.liffClientId}`)
+            formData.append('client_secret', '2ad91db933341ce52b3b92d586a09ef9')
+
+            const res = await axios.post('https://api.line.me/oauth2/v2.1/token', formData, {
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
+            }).catch(err => err.response)
+
+            this.test = res
+        }
+
+
         // 初期化
         this.$liffInit
             .then(() => {
