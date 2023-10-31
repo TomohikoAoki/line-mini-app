@@ -9,3 +9,8 @@ You can directly use them in pages and other components without the need to impo
 - `<Loading>` | `<loading>` (components/Loading.vue)
 - `<ModalConnectConfirm>` | `<modal-connect-confirm>` (components/Modal/ConnectConfirm.vue)
 - `<ModalFlashMessage>` | `<modal-flash-message>` (components/Modal/FlashMessage.vue)
+- `<SvgBase>` | `<svg-base>` (components/Svg/Base.vue)
+- `<SvgDataDisplayPointBottom>` | `<svg-data-display-point-bottom>` (components/Svg/Data/DisplayPointBottom.vue)
+- `<SvgDataDisplayPointTop>` | `<svg-data-display-point-top>` (components/Svg/Data/DisplayPointTop.vue)
+- `<SvgDataIconNaviAdd>` | `<svg-data-icon-navi-add>` (components/Svg/Data/IconNaviAdd.vue)
+- `<SvgDataTopImage>` | `<svg-data-top-image>` (components/Svg/Data/TopImage.vue)

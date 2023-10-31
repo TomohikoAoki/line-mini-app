@@ -7,5 +7,20 @@
   },
   "ModalFlashMessage": {
     "description": "Auto imported from components/Modal/FlashMessage.vue"
+  },
+  "SvgBase": {
+    "description": "Auto imported from components/Svg/Base.vue"
+  },
+  "SvgDataDisplayPointBottom": {
+    "description": "Auto imported from components/Svg/Data/DisplayPointBottom.vue"
+  },
+  "SvgDataDisplayPointTop": {
+    "description": "Auto imported from components/Svg/Data/DisplayPointTop.vue"
+  },
+  "SvgDataIconNaviAdd": {
+    "description": "Auto imported from components/Svg/Data/IconNaviAdd.vue"
+  },
+  "SvgDataTopImage": {
+    "description": "Auto imported from components/Svg/Data/TopImage.vue"
   }
 }

@@ -2,16 +2,41 @@
     <div class="app-main">
         <div class="point-area">
             <div>
-                <h1 class="point-title">ハートフルポイント</h1>
+                <div>
+                    <SvgBase icon-name="display-point-top" viewBox="0 0 258.5 65.5" iconColor="#efb94b"
+                        iconTitle="ハートフルポイント">
+                        <DisplayPointTop></DisplayPointTop>
+                    </SvgBase>
+                </div>
                 <div class="point-content">
                     <p class="current-point">現在のポイント:</p>
                     <p class="point-display"><span class="point">{{ point }}</span><span class="pt">pt</span></p>
                 </div>
+                <div>
+                    <SvgBase icon-name="display-point-bottom" viewBox="0 0 258.5 35" iconColor="#efb94b"
+                        iconTitle="ハートフルポイントボトム">
+                        <DisplayPointBottom></DisplayPointBottom>
+                    </SvgBase>
+                </div>
             </div>
         </div>
         <div class="navi">
-            <div class="navi-item" @click="readingQrCode">ポイントを<br>貯める</div>
-            <div class="navi-item">ポイントを使う</div>
+            <div class="navi-item" @click="readingQrCode">
+                <div class="navi-item__icon">
+                    <SvgBase icon-name="icon-navi-add" viewBox="0 0 77.5 85.4" iconColor="#efb94b" iconTitle="ポイントを貯める">
+                        <IconNaviAdd></IconNaviAdd>
+                    </SvgBase>
+                </div>
+                <p class="navi-item__text">ポイントを<br>貯める</p>
+            </div>
+            <div class="navi-item" @click="readingQrCode">
+                <div class="navi-item__icon">
+                    <SvgBase icon-name="icon-navi-add" viewBox="0 0 77.5 85.4" iconColor="#efb94b" iconTitle="ポイントを貯める">
+                        <IconNaviAdd></IconNaviAdd>
+                    </SvgBase>
+                </div>
+                <p class="navi-item__text">ポイントを<br>使う</p>
+            </div>
         </div>
         <Transition name="fade">
             <ConnectConfirm v-model="modalFlag" v-if="modalFlag" @formData="connectMember" class="connect-confirm">
@@ -40,6 +65,11 @@
 import ConnectConfirm from '../components/Modal/ConnectConfirm.vue'
 import FlashMessage from '../components/Modal/FlashMessage.vue'
 
+import SvgBase from '../components/Svg/Base.vue'
+import DisplayPointTop from '../components/Svg/Data/DisplayPointTop'
+import DisplayPointBottom from '../components/Svg/Data/DisplayPointBottom'
+import IconNaviAdd from '../components/Svg/Data/IconNaviAdd'
+
 import { mapGetters } from 'vuex'
 import axios from 'axios'
 
@@ -64,47 +94,52 @@ export default {
     },
     components: {
         ConnectConfirm,
-        FlashMessage
+        FlashMessage,
+        SvgBase,
+        DisplayPointTop,
+        DisplayPointBottom,
+        IconNaviAdd
     },
     computed: {
         ...mapGetters({
             token: "getToken",
             member: 'getMember',
             lineProfile: 'getProfile',
+            firstContact: 'getFirstContact',
         }),
     },
     watch: {
         // storeのtokenの監視
-        token(val) {
-            // storeのtokenが変化して存在してたら
-            if (val) {
-                $nuxt.$loading.start();
+        // token(val) {
+        //     // storeのtokenが変化して存在してたら
+        //     if (val) {
+        //         $nuxt.$loading.start();
 
-                // watchの中だからthen構文で
-                axios.get(`https://sysf.heartful.work/epoints/verifyLineToken/?id_token=${this.token}`)
-                    .then((response) => {
-                        this.response = response
+        //         // watchの中だからthen構文で
+        //         axios.get(`https://sysf.heartful.work/epoints/verifyLineToken/?id_token=${this.token}`)
+        //             .then((response) => {
+        //                 this.response = response
 
-                        // this.point = response.data.data.point ?? 0
-                        // this.$store.dispatch('setMember', response.data.data)
-                        this.message = '会員情報との紐づけができました。'
+        //                 // this.point = response.data.data.point ?? 0
+        //                 // this.$store.dispatch('setMember', response.data.data)
+        //                 this.message = '会員情報との紐づけができました。'
 
-                        $nuxt.$loading.finish();
-                    }).catch((err) => {
-                        // 紐づけができなかった場合
-                        if (!err.response) {
-                            this.err = err
-                            this.message = 'ネットワークエラー。ステータスコード拾えない'
-                            $nuxt.$loading.finish();
-                            return false
-                        }
-                        this.err = err.response
-                        // ひもづけを行うためのモーダルオープン
-                        this.modalFlag = true
-                        $nuxt.$loading.finish();
-                    })
-            }
-        }
+        //                 $nuxt.$loading.finish();
+        //             }).catch((err) => {
+        //                 // 紐づけができなかった場合
+        //                 if (!err.response) {
+        //                     this.err = err
+        //                     this.message = 'ネットワークエラー。ステータスコード拾えない'
+        //                     $nuxt.$loading.finish();
+        //                     return false
+        //                 }
+        //                 this.err = err.response
+        //                 // ひもづけを行うためのモーダルオープン
+        //                 this.modalFlag = true
+        //                 $nuxt.$loading.finish();
+        //             })
+        //     }
+        // }
     },
     methods: {
         // LINE_IDと会員情報の紐づけ
@@ -195,10 +230,38 @@ export default {
         },
         opneConnectMember() {
             this.modalFlag = true
+        },
+        // LineIDが登録されている場合、
+        // point取得
+        async connectMemberByLineToken() {
+            $nuxt.$loading.start();
+            // watchの中だからthen構文で
+            axios.get(`https://sysf.heartful.work/epoints/verifyLineToken/?id_token=${this.token}`)
+                .then((response) => {
+                    this.response = response
+
+                    // this.point = response.data.data.point ?? 0
+                    // this.$store.dispatch('setMember', response.data.data)
+                    this.message = '会員情報との紐づけができました。'
+
+                    $nuxt.$loading.finish();
+                }).catch((err) => {
+                    // 紐づけができなかった場合
+                    if (!err.response) {
+                        this.err = err
+                        this.message = 'ネットワークエラー。ステータスコード拾えない'
+                        $nuxt.$loading.finish();
+                        return false
+                    }
+                    this.err = err.response
+                    // ひもづけを行うためのモーダルオープン
+                    this.modalFlag = true
+                    $nuxt.$loading.finish();
+                })
         }
     },
     async mounted() {
-        // line ブラウザ以外で表示した場合？？
+        // lineブラウザ以外で表示した場合？？
         if (this.$route.query.liffClientId) {
             this.query = this.$route.query
 
@@ -218,21 +281,13 @@ export default {
             this.test = res
         }
 
+        // 初回のみ自動で
+        // LineIdが紐づいていればpoint取得
+        if (this.firstContact) {
+            this.connectMemberByLineToken()
+            this.$store.dispatch('setFirstContact')
+        }
 
-        // 初期化
-        this.$liffInit
-            .then(() => {
-                const token = liff.getIDToken();
-                const profileData = liff.getDecodedIDToken()
-
-                //storeにLINEのtokenとprofileを保存
-                this.$store.dispatch('setToken', token)
-                this.$store.dispatch('setProfile', profileData)
-
-
-            }).catch((error) => {
-                this.$router.push('/')
-            })
 
     },
 }
@@ -241,6 +296,8 @@ export default {
 
 <style lang="scss">
 @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@700&display=swap');
+
+$baseColor : #efb94b;
 
 .app-main {
     background-color: rgb(70, 53, 106);
@@ -257,7 +314,6 @@ export default {
     width: 90%;
     margin: 0 auto;
     padding: 50px 10px;
-    filter: drop-shadow(0 0 5px #999);
     border-radius: 10px;
 
     .point-title {
@@ -271,22 +327,24 @@ export default {
 }
 
 .point-content {
-    background-color: #FFF;
     padding: 3em;
     text-align: center;
-    border-radius: 0 0 10px 10px;
 
-    .current-point {}
+    .current-point {
+        color: $baseColor;
+    }
 
     .point-display {
         .point {
             font-family: 'Amiri', serif;
-            color: rgb(117, 21, 40);
+            color: $baseColor;
             font-weight: bold;
             font-size: 3em;
         }
 
         .pt {
+            font-family: 'Amiri', serif;
+            color: $baseColor;
             font-weight: bold;
             font-size: 1.3em;
         }
@@ -300,22 +358,36 @@ export default {
 
     .navi-item {
         width: 150px;
-        padding: 70px 0;
+        padding: 25px 0 20px 0;
         text-align: center;
-        background-color: #d99090;
+        border: 1px solid $baseColor;
         color: #fff;
         font-weight: bold;
         border-radius: 10px;
         margin: 0 0.4em;
+        position: relative;
 
-        &.disable {
-            opacity: 0.2;
-        }
-
-        a {
+        &::before {
+            content: "";
+            display: block;
             width: 100%;
             height: 100%;
-            display: inline-block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            background-color: $baseColor;
+            opacity: 0.05;
+        }
+
+        .navi-item__icon {
+            width: 45%;
+            margin: 0 auto;
+        }
+
+        .navi-item__text {
+            padding-top: 1em;
+            font-size: 0.9em;
+            color: $baseColor;
         }
     }
 }
@@ -353,8 +425,15 @@ export default {
     padding-bottom: 70px;
 
     .link__list {
+        border-top: 1px solid $baseColor;
+        border-bottom: 1px solid $baseColor;
+
         .link__list_item {
-            border-bottom: 1px solid;
+            border-bottom: 1px dotted;
+
+            &:last-child {
+                border-bottom: none;
+            }
 
             .item_container {
                 display: block;
@@ -368,6 +447,8 @@ export default {
                 }
             }
         }
+
+
     }
 }
 
