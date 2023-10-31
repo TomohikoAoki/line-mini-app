@@ -1,21 +1,24 @@
 <template>
   <div class="home">
-    <div>
-      <h1>TOP PEGE</h1>
-      <p>会員じゃなくても誰でも見れる</p>
-      <button @click="login" class="button--primary">LINEでログイン</button>
-      <div class="test">
-        scssテスト
-        <div class="test_test">
-          テスト・テスト
-        </div>
-      </div>
+    <div class="top-image">
+      <SvgBase icon-name="top-image" viewBox="0 0 352 352" iconColor="#efb94b" iconTitle="トップイメージ">
+        <TopImage></TopImage>
+      </SvgBase>
     </div>
+    <p class="top-text">ラインと連携したハートフルのアプリ。<br>ポイントの確認や、ポイント付与、ポイントの利用ができます</p>
+    <div class="login-area">
+      <button @click="login" class="home__buttons__button button--primary">LINEでログイン</button>
+    </div>
+
   </div>
 </template>
 
 <script>
 import packageJson from "../package.json";
+
+import SvgBase from "../components/Svg/Base.vue"
+import TopImage from "../components/Svg/Data/TopImage.vue"
+
 export default {
   data: function () {
     return {
@@ -23,6 +26,10 @@ export default {
       sdkVersion: "",
       liffError: ""
     };
+  },
+  components: {
+    SvgBase,
+    TopImage
   },
   methods: {
     async login() {
@@ -35,6 +42,15 @@ export default {
     this.$liffInit
       .then(() => {
         this.sdkVersion = liff.getVersion();
+
+        const token = liff.getIDToken();
+        const profileData = liff.getDecodedIDToken()
+
+        //storeにLINEのtokenとprofileを保存
+        this.$store.dispatch('setToken', token)
+        this.$store.dispatch('setProfile', profileData)
+
+        this.$router.push('/top')
       })
       .catch((error) => {
         this.liffError = error;
@@ -43,7 +59,7 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 html,
 body {
   font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
@@ -55,71 +71,18 @@ body {
 .home {
   padding: 5rem 2rem;
   text-align: center;
+  background-color: rgb(70, 53, 106);
+  background-image: url(~static/images/bg.jpg);
+  background-repeat: repeat-y;
+  background-size: 100% auto;
+  min-height: 100vh;
 }
 
-.home__title {
-  font-size: 6rem;
-  line-height: 1.15;
-}
-
-.home__title__link {
-  color: #06c755;
-  text-decoration: none;
-}
-
-.home__title__link:hover {
-  text-decoration: underline;
-}
-
-.home__badges {
-  align-items: center;
-  justify-content: center;
-  display: flex;
-  flex-wrap: nowrap;
-  overflow: hidden;
-  margin-bottom: 6rem;
-}
-
-.home__badges__badge:first-child {
-  border-top-left-radius: 2px;
-  border-bottom-left-radius: 2px;
-}
-
-.home__badges__badge:last-child {
-  border-top-right-radius: 2px;
-  border-bottom-right-radius: 2px;
-}
-
-.home__badges__badge {
-  display: inline-block;
-  padding: 0.3em 0.4em;
-  font-size: 0.75rem;
-  font-weight: 700;
-  line-height: 1;
-  text-align: center;
-  white-space: nowrap;
-  vertical-align: baseline;
-}
-
-.badge--primary {
-  color: #353a40;
-  border: 1px solid #353a40;
-  background-color: transparent;
-  padding-top: calc(0.3em - 1px);
-  padding-bottom: calc(0.3em - 1px);
-}
-
-.badge--secondary {
-  color: #fff;
-  background-color: #353a40;
-}
-
-.home__buttons {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 1rem;
+.top-text {
+  font-size: 16px;
+  color: #efb94b;
+  padding: 2em 0;
+  line-height: 1.7em;
 }
 
 .home__buttons__button {
@@ -152,57 +115,13 @@ body {
   border-color: #008600;
 }
 
-.button--secondary {
-  color: #fff;
-  background-color: #353a40;
-  border-color: #353a40;
-}
-
-.button--secondary:hover {
-  color: #fff;
-  background-color: #24272b;
-  border-color: #1e2124;
-}
-
-.button--tertiary {
-  background-color: transparent;
-  background-image: none;
-  color: #353a40;
-  border-color: #353a40;
-}
-
-.button--tertiary:hover {
-  color: #353a40;
-  background-color: rgba(53, 58, 64, 0.1);
-  border-color: #353a40;
-}
-
 @media screen and (max-width: 600px) {
   html {
     font-size: 12px;
   }
 
-  .home__title {
-    font-size: 4rem;
-    line-height: 1.15;
-  }
-
   .home__buttons__button {
     font-size: 1.5rem;
-  }
-}
-
-@media screen and (max-width: 930px) {
-  .home__buttons {
-    flex-direction: column;
-  }
-}
-
-.test {
-  color: #00b900;
-
-  .test_test {
-    color: blueviolet;
   }
 }
 </style>

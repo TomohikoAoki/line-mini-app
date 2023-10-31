@@ -13,8 +13,8 @@ import { createStore } from './store.js'
 
 /* Plugins */
 
-import nuxt_plugin_plugin_1218cbb1 from 'nuxt_plugin_plugin_1218cbb1' // Source: .\\components\\plugin.js (mode: 'all')
-import nuxt_plugin_liffinitclient_46eda6f0 from 'nuxt_plugin_liffinitclient_46eda6f0' // Source: ..\\plugins\\liff-init.client.js (mode: 'client')
+import nuxt_plugin_plugin_61d9cb9c from 'nuxt_plugin_plugin_61d9cb9c' // Source: ./components/plugin.js (mode: 'all')
+import nuxt_plugin_liffinitclient_46eda6f0 from 'nuxt_plugin_liffinitclient_46eda6f0' // Source: ../plugins/liff-init.client.js (mode: 'client')
 
 // Component: <ClientOnly>
 Vue.component(ClientOnly.name, ClientOnly)
@@ -211,8 +211,8 @@ async function createApp(ssrContext, config = {}) {
   }
   // Plugin execution
 
-  if (typeof nuxt_plugin_plugin_1218cbb1 === 'function') {
-    await nuxt_plugin_plugin_1218cbb1(app.context, inject)
+  if (typeof nuxt_plugin_plugin_61d9cb9c === 'function') {
+    await nuxt_plugin_plugin_61d9cb9c(app.context, inject)
   }
 
   if (process.client && typeof nuxt_plugin_liffinitclient_46eda6f0 === 'function') {

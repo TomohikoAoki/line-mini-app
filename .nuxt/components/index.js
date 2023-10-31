@@ -1,6 +1,11 @@
-export { default as Loading } from '../..\\components\\Loading.vue'
-export { default as ModalConnectConfirm } from '../..\\components\\Modal\\ConnectConfirm.vue'
-export { default as ModalFlashMessage } from '../..\\components\\Modal\\FlashMessage.vue'
+export { default as Loading } from '../../components/Loading.vue'
+export { default as ModalConnectConfirm } from '../../components/Modal/ConnectConfirm.vue'
+export { default as ModalFlashMessage } from '../../components/Modal/FlashMessage.vue'
+export { default as SvgBase } from '../../components/Svg/Base.vue'
+export { default as SvgDataDisplayPointBottom } from '../../components/Svg/Data/DisplayPointBottom.vue'
+export { default as SvgDataDisplayPointTop } from '../../components/Svg/Data/DisplayPointTop.vue'
+export { default as SvgDataIconNaviAdd } from '../../components/Svg/Data/IconNaviAdd.vue'
+export { default as SvgDataTopImage } from '../../components/Svg/Data/TopImage.vue'
 
 // nuxt/nuxt.js#8607
 function wrapFunctional(options) {

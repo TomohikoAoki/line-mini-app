@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="app">
         <Loading></Loading>
         <Nuxt />
     </div>
@@ -17,6 +17,13 @@ export default {
 </script>
 
 <style>
+.app {
+    background-color: rgb(70, 53, 106);
+    background-image: url(~static/images/bg.jpg);
+    background-repeat: repeat-y;
+    background-size: 100% auto;
+}
+
 .page-enter-active,
 .page-leave-active {
     transition: opacity 0.3s;
