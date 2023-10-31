@@ -1,6 +1,6 @@
-export { default as Loading } from '../..\\components\\Loading.vue'
-export { default as ModalConnectConfirm } from '../..\\components\\Modal\\ConnectConfirm.vue'
-export { default as ModalFlashMessage } from '../..\\components\\Modal\\FlashMessage.vue'
+export { default as Loading } from '../../components/Loading.vue'
+export { default as ModalConnectConfirm } from '../../components/Modal/ConnectConfirm.vue'
+export { default as ModalFlashMessage } from '../../components/Modal/FlashMessage.vue'
 
 // nuxt/nuxt.js#8607
 function wrapFunctional(options) {

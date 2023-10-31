@@ -200,7 +200,7 @@ export async function setContext (app, context) {
       payload: context.payload,
       error: context.error,
       base: app.router.options.base,
-      env: {}
+      env: {"LIFF_ID":"2001061637-2gNwm9z5"}
     }
     // Only set once
 

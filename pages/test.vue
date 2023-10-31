@@ -13,16 +13,26 @@
             <div class="navi-item" @click="readingQrCode">ポイントを<br>貯める</div>
             <div class="navi-item">ポイントを使う</div>
         </div>
+        <Transition name="fade">
+            <ConnectConfirm v-model="modalFlag" v-if="modalFlag" @formData="connectMember" class="connect-confirm">
+            </ConnectConfirm>
+        </Transition>
+        <Transition name="fade">
+            <FlashMessage v-if="message" @close="closeMessage">{{ message }}</FlashMessage>
+        </Transition>
+        <nav class="link">
+            <ul class="link__list">
+                <li class="link__list_item"><span class="item_container" @click="opneConnectMember">会員連携</span></li>
+                <li class="link__list_item"><nuxt-link to="/terms" class="item_container">利用規約</nuxt-link></li>
+                <li class="link__list_item"><nuxt-link to="/privacy" class="item_container">プライバシーポリシー</nuxt-link></li>
+            </ul>
+        </nav>
         <div class="test">
             <p><span class="labeel">response</span><br> {{ response }}</p>
             <p><span class="labeel">err</span><br>{{ err }}</p>
             <p><span class="labeel">query</span><br>{{ query }}</p>
             <p><span class="labeel">test</span><br>{{ test }}</p>
         </div>
-        <ConnectConfirm v-model="modalFlag" v-if="modalFlag" @formData="connectMember"></ConnectConfirm>
-        <Transition name="fade">
-            <FlashMessage v-if="message" @close="closeMessage">{{ message }}</FlashMessage>
-        </Transition>
     </div>
 </template>
 
@@ -73,7 +83,7 @@ export default {
                 // watchの中だからthen構文で
                 axios.get(`https://sysf.heartful.work/epoints/verifyLineToken/?id_token=${this.token}`)
                     .then((response) => {
-                        this.response = response.data
+                        this.response = response
 
                         // this.point = response.data.data.point ?? 0
                         // this.$store.dispatch('setMember', response.data.data)
@@ -183,6 +193,9 @@ export default {
         closeMessage() {
             this.message = null
         },
+        opneConnectMember() {
+            this.modalFlag = true
+        }
     },
     async mounted() {
         // line ブラウザ以外で表示した場合？？
@@ -218,8 +231,7 @@ export default {
 
 
             }).catch((error) => {
-                // どうしようもないからエラーページに飛ばす
-                this.error = error
+                this.$router.push('/')
             })
 
     },
@@ -228,9 +240,18 @@ export default {
 </script>
 
 <style lang="scss">
+@import url('https://fonts.googleapis.com/css2?family=Amiri:wght@700&display=swap');
+
 .app-main {
+    background-color: rgb(70, 53, 106);
+    background-image: url(~static/images/bg.jpg);
+    background-repeat: repeat-y;
+    background-size: 100% auto;
     position: relative;
+    width: 100%;
 }
+
+
 
 .point-area {
     width: 90%;
@@ -259,6 +280,7 @@ export default {
 
     .point-display {
         .point {
+            font-family: 'Amiri', serif;
             color: rgb(117, 21, 40);
             font-weight: bold;
             font-size: 3em;
@@ -310,10 +332,51 @@ export default {
     font-weight: bold;
 }
 
-.test {
+.connect-confirm {
+    width: 100vw;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1001;
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: auto;
+}
+
+.link {
     width: 90%;
     margin: 0 auto;
+    color: #efb94b;
+    padding-top: 30px;
+    padding-bottom: 70px;
+
+    .link__list {
+        .link__list_item {
+            border-bottom: 1px solid;
+
+            .item_container {
+                display: block;
+                width: 100%;
+                height: 100%;
+                padding: 1em;
+
+                &:hover {
+                    filter: brightness(120%);
+                    background-color: blueviolet;
+                }
+            }
+        }
+    }
+}
+
+.test {
+    width: 100%;
+    margin: 0 auto;
     overflow-wrap: break-word;
+    background-color: #000000;
+    color: #fff;
 }
 
 .labeel {

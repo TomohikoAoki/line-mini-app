@@ -1,31 +1,34 @@
 <template>
     <div class="modal-container">
         <div class="modal-content">
-            <p>
-                以前にハートフル会員にご登録頂いている場合は、データの紐づけが必要です。
-                下記にご登録いただいたメールアドレスとパスワードを入力し、送信してください。
+            <h2 class="modal-title">ハートフル会員に連携して<br>ポイントを合算する</h2>
+            <p class="first-text">
+                ハートフルポイントをすでにお持ちの方でこれまで貯めていたポイントと合算してポイントを貯めたい方はID連携してください。<br>
+                初めてご利用の方は会員登録なしでLINE内でハートフルポイントを貯めることができます。
             </p>
+            <p class="first-text__note">※LINE内で貯めたハートフルポイントを会員連携で合算することはできませんのでご注意ください。</p>
+            <p class="first-text__note">※受付予約の前に会員連携をしていただかないとポイントは付与されません。</p>
             <form class="form">
                 <div class="form-group">
-                    <label>メールアドレス</label>
+                    <label class="form-label">メールアドレス</label>
                     <div class="form-content">
                         <input class="input-text" v-model="formData.usrmail" type="email" @blur="fieldValidation('usrmail')"
                             :class="{ valid: validation.usrmail, invalid: validation.usrmail === false }">
                         <div class="error"><span v-if="validation.usrmail === false">{{
-                            validationMessage.usrmail[messageNumber] }}</span>
+                            validationMessage.usrmail[messageNumber.usrmail] }}</span>
                         </div>
 
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>パスワード</label>
+                    <label class="form-label">パスワード</label>
                     <div class="form-content">
                         <input class="input-text" v-model="formData.password" type="password"
-                            @blur="fieldValidation('pass')"
+                            @blur="fieldValidation('password')"
                             :class="{ valid: validation.password, invalid: validation.password === false }">
                     </div>
                     <div class="error"><span v-if="validation.password === false">{{
-                        validationMessage.password[messageNumber] }}</span></div>
+                        validationMessage.password[messageNumber.password] }}</span></div>
                 </div>
                 <button @click.prevent="connect" class="btn" :disabled="!validation.usrmail || !validation.password"
                     :class="{ disable: !validation.usrmail || !validation.password }">
@@ -33,8 +36,8 @@
                 </button>
             </form>
             <br>
-            <div class="register">
-                このまま利用する場合は閉じるを押してください。
+            <div class="close-area">
+                <p class="close-area__text">会員登録なしでLINE内でハートフルポイントを貯める場合は閉じるを押してください。</p>
                 <button @click="close" class="btn">閉じる</button>
             </div>
         </div>
@@ -42,6 +45,11 @@
 </template>
 
 <script>
+import {
+    disableBodyScroll,
+    enableBodyScroll,
+    clearAllBodyScrollLocks,
+} from "body-scroll-lock";
 
 export default {
     data() {
@@ -62,10 +70,12 @@ export default {
                 password: ['必ず入力してください。', '半角英数字で入力してください。']
             },
             // messageのための番号
-            messageNumber: null
+            messageNumber: {
+                usrmail: null,
+                password: null
+            }
+
         }
-    },
-    computed: {
     },
     methods: {
         connect() {
@@ -77,83 +87,85 @@ export default {
         // validation
         fieldValidation(field) {
             // validationの形式
-            const rgxMail = /^[a-zA-Z0-9_.+-]+@([a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]*\.)+[a-zA-Z]{2,}$/
-            const rgxPass = /^[0-9a-zA-Z]*$/
-            // validation
-            if (field === 'usrmail') {
-                // mail 空の場合
-                if (this.formData.usrmail === '') {
-                    this.messageNumber = 0
-                    this.validation.usrmail = false
-                    return
-                }
-                // mail 正規表現を合わない場合
-                this.messageNumber = 1
-                this.validation.usrmail = rgxMail.test(this.formData.usrmail)
+            const rgx = {
+                usrmail: "\^[a-zA-Z0-9_.+-]+@([a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]*\.)+[a-zA-Z]{2,}$",
+                password: "\^[0-9a-zA-Z]*$"
+            }
+
+            // 空の場合
+            if (this.formData[field] === '') {
+                this.messageNumber[field] = 0
+                this.validation[field] = false
                 return
             }
-            if (field === 'pass') {
-                // password 空の場合
-                if (this.formData.password === '') {
-                    this.messageNumber = 0
-                    this.validation.password = false
-                    return
-                }
-                // password 正規表現を合わない場合
-                this.messageNumber = 1
-                this.validation.password = rgxPass.test(this.formData.password)
-                return
-            }
+            // mail 正規表現を合わない場合
+            const rgxObj = new RegExp(rgx[field])
+            this.validation[field] = rgxObj.test(this.formData[field])
+
+            this.messageNumber[field] = this.validation[field] ? null : 1
         }
+    },
+    mounted() {
+        const confirmModal = document.querySelector(".modal-container");
+        disableBodyScroll(confirmModal);
+    },
+    beforeDestroy() {
+        clearAllBodyScrollLocks();
     },
 }
 </script>
 
 <style lang="scss" scoped>
 .modal-container {
-    position: fixed;
-    top: 0;
-    left: 0;
     width: 100vw;
-    height: 100vh;
-    z-index: 100;
-    background-color: rgba(0, 0, 0, 0.3);
+    padding: 50px 0 150px 0;
+
 
     .modal-content {
-        position: absolute;
         padding: 2em 1em;
         width: 90%;
-        height: 80%;
+        margin: 0 auto;
+        min-height: 80%;
         background-color: #fff;
-        top: 50%;
-        left: 50%;
-        transform: translateX(-50%) translateY(-50%);
+        border-radius: 10px;
 
-        .register {
-            padding-top: 2em
+        .modal-title {
+            font-weight: bold;
+            text-align: center;
+            padding: 0 0 1em 0;
         }
     }
 }
 
-.btn {
-    display: block;
-    margin: 10% auto;
-
-    &.disable {
-        opacity: 0.2;
-    }
+.first-text {
+    line-height: 1.5em;
+    width: 95%;
+    margin: 0 auto 0.5em auto;
+    font-size: 0.9em;
 }
+
+.first-text__note {
+    font-size: 0.8em;
+    padding: 0.3em 0;
+}
+
+
 
 .form {
     width: 90%;
     margin: 0 auto;
 
     .form-group {
-        margin: 0 0 1em 0;
+        margin: 0.5em 0 0.5em 0;
 
-        .form-label {}
+        .form-label {
+            font-weight: bold;
+            font-size: 0.9em;
+        }
 
         .form-content {
+            padding-top: 0.3em;
+
             .input-text {
                 display: block;
                 border: 1px solid #b7b7b7;
@@ -195,5 +207,19 @@ export default {
     border-radius: 10px;
     color: #fff;
     font-weight: bold;
+
+    &.disable {
+        opacity: 0.2;
+    }
+}
+
+.close-area {
+    padding-top: 2em;
+
+    .close-area__text {
+        text-align: center;
+        padding-bottom: 1em;
+        font-size: 0.9em;
+    }
 }
 </style>

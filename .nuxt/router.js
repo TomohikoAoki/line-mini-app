@@ -4,10 +4,12 @@ import { normalizeURL, decode } from 'ufo'
 import { interopDefault } from './utils'
 import scrollBehavior from './router.scrollBehavior.js'
 
-const _7b9e7189 = () => interopDefault(import('..\\pages\\register.vue' /* webpackChunkName: "pages/register" */))
-const _22e1e210 = () => interopDefault(import('..\\pages\\test.vue' /* webpackChunkName: "pages/test" */))
-const _59e3c216 = () => interopDefault(import('..\\pages\\testscan.vue' /* webpackChunkName: "pages/testscan" */))
-const _07aee948 = () => interopDefault(import('..\\pages\\index.vue' /* webpackChunkName: "pages/index" */))
+const _745c1ca2 = () => interopDefault(import('../pages/privacy.vue' /* webpackChunkName: "pages/privacy" */))
+const _4d06450e = () => interopDefault(import('../pages/register.vue' /* webpackChunkName: "pages/register" */))
+const _e3de38be = () => interopDefault(import('../pages/terms.vue' /* webpackChunkName: "pages/terms" */))
+const _50e0f2e8 = () => interopDefault(import('../pages/test.vue' /* webpackChunkName: "pages/test" */))
+const _30ec8ae5 = () => interopDefault(import('../pages/testscan.vue' /* webpackChunkName: "pages/testscan" */))
+const _37d9b528 = () => interopDefault(import('../pages/index.vue' /* webpackChunkName: "pages/index" */))
 
 const emptyFn = () => {}
 
@@ -21,20 +23,28 @@ export const routerOptions = {
   scrollBehavior,
 
   routes: [{
+    path: "/privacy",
+    component: _745c1ca2,
+    name: "privacy"
+  }, {
     path: "/register",
-    component: _7b9e7189,
+    component: _4d06450e,
     name: "register"
   }, {
+    path: "/terms",
+    component: _e3de38be,
+    name: "terms"
+  }, {
     path: "/test",
-    component: _22e1e210,
+    component: _50e0f2e8,
     name: "test"
   }, {
     path: "/testscan",
-    component: _59e3c216,
+    component: _30ec8ae5,
     name: "testscan"
   }, {
     path: "/",
-    component: _07aee948,
+    component: _37d9b528,
     name: "index"
   }],
 
