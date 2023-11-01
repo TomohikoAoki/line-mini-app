@@ -21,7 +21,7 @@
             </div>
         </div>
         <div class="navi">
-            <div class="navi-item" @click="readingQrCode">
+            <div class="navi-item" @click="addPoint">
                 <div class="navi-item__icon">
                     <SvgBase icon-name="icon-navi-add" viewBox="0 0 77.5 85.4" iconColor="#efb94b" iconTitle="ポイントを貯める">
                         <IconNaviAdd></IconNaviAdd>
@@ -29,7 +29,7 @@
                 </div>
                 <p class="navi-item__text">ポイントを<br>貯める</p>
             </div>
-            <div class="navi-item" @click="readingQrCode">
+            <div class="navi-item" @click="usePoint">
                 <div class="navi-item__icon">
                     <SvgBase icon-name="icon-navi-add" viewBox="0 0 77.5 85.4" iconColor="#efb94b" iconTitle="ポイントを貯める">
                         <IconNaviAdd></IconNaviAdd>
@@ -80,14 +80,7 @@ export default {
             point: 0,
             message: null,
             response: null,
-            email: null,
-            name: null,
             test: null,
-            result: null,
-            time: null,
-            exp: null,
-            qrError: null,
-            qrValue: null,
             err: null,
             query: null
         }
@@ -108,41 +101,8 @@ export default {
             firstContact: 'getFirstContact',
         }),
     },
-    watch: {
-        // storeのtokenの監視
-        // token(val) {
-        //     // storeのtokenが変化して存在してたら
-        //     if (val) {
-        //         $nuxt.$loading.start();
-
-        //         // watchの中だからthen構文で
-        //         axios.get(`https://sysf.heartful.work/epoints/verifyLineToken/?id_token=${this.token}`)
-        //             .then((response) => {
-        //                 this.response = response
-
-        //                 // this.point = response.data.data.point ?? 0
-        //                 // this.$store.dispatch('setMember', response.data.data)
-        //                 this.message = '会員情報との紐づけができました。'
-
-        //                 $nuxt.$loading.finish();
-        //             }).catch((err) => {
-        //                 // 紐づけができなかった場合
-        //                 if (!err.response) {
-        //                     this.err = err
-        //                     this.message = 'ネットワークエラー。ステータスコード拾えない'
-        //                     $nuxt.$loading.finish();
-        //                     return false
-        //                 }
-        //                 this.err = err.response
-        //                 // ひもづけを行うためのモーダルオープン
-        //                 this.modalFlag = true
-        //                 $nuxt.$loading.finish();
-        //             })
-        //     }
-        // }
-    },
     methods: {
-        // LINE_IDと会員情報の紐づけ
+        // LINE_IDと会員情報の連携
         // modalからのformDataのemitで開始
         async connectMember(formData) {
             this.modalFlag = false
@@ -177,60 +137,6 @@ export default {
 
             $nuxt.$loading.finish();
         },
-        // point送信関数
-        async sendPoint(result) {
-            const response = await axios.post('https://tonq.net/api/heartful/point/add', result, {
-                headers: {
-                    Authorization: "ApiToken ymEYCBC4BjxjxAhvgUF2TLCqRmYtwXaNKjwSbwjv",
-                }
-            }).catch(err => err.response)
-            this.response = response
-            return response
-        },
-        // QRコードリーダー起動 & ポイント送信
-        readingQrCode() {
-            $nuxt.$loading.start();
-            liff.scanCodeV2()
-                .then((result) => {
-                    // result:QRコードからの情報 {value:{point:int,code_id:any,user_id:string,exp:int}}
-                    // codeIDで連続の使用を防ぐ
-                    //let value = JSON.parse(result.value)
-
-                    this.qrValue = result
-
-                    // ここに使用期限が切れていないかのチェックいれる
-                    const date = new Date()
-                    const time = date.getTime()
-
-                    // 切れている場合は表示
-                    // if (value.exp < time) {
-                    //     this.message = '有効期限が切れています'
-                    //     return false
-                    // }
-
-                    // userID,point,codeIDを送信
-                    // value['member_id'] = this.member.member_id
-                    // return this.sendPoint(value)
-                })
-                // .then((response) => {
-                //     this.response = response
-                //     this.$store.dispatch('setMember', response.data.data)
-                //     this.point = response.data.data.point
-                //     // 表示 成功した
-                //     this.message = 'ポイントが加算されました'
-                // })
-                .catch((err) => {
-                    // どうするか？？？？
-                    this.message = 'すでに使用されたクーポンです'
-                });
-            $nuxt.$loading.finish();
-        },
-        closeMessage() {
-            this.message = null
-        },
-        opneConnectMember() {
-            this.modalFlag = true
-        },
         // LineIDが登録されている場合、
         // point取得
         async connectMemberByLineToken() {
@@ -258,10 +164,83 @@ export default {
                     this.modalFlag = true
                     $nuxt.$loading.finish();
                 })
-        }
+        },
+        // QRコードリーダー起動 & ポイント追加
+        addPoint() {
+            $nuxt.$loading.start();
+            liff.scanCodeV2()
+                .then((result) => {
+                    if (result.value !== null) {
+                        // TODO: 【code_id】修正予定
+                        var ekanteisId = JSON.parse(result.value)['code_id'];
+                        // alert(ekanteisId);
+
+                        return this.axiosGetTotalpoints('add/195124');
+                        // totalpoints = axiosGet('add/'+ ekanteisId);
+                    }
+                    this.message = 'QRコードが正常に読み込まれませんでした'
+                })
+                .then((point) => {
+                    this.message = 'ポイントが加算されました'
+                    this.point = point
+                })
+                .catch((err) => {
+                    // どうするか？？？？
+                    this.err = err
+                    this.message = '何かしらエラー'
+                });
+            $nuxt.$loading.finish();
+        },
+        // QRコードリーダー起動 & ポイント使用
+        usePoint() {
+            liff.scanCodeV2()
+                .then((result) => {
+                    if (result.value != null) {
+                        var val = JSON.parse(result.value);
+                        // 【code_id】修正予定
+                        var ekanteisId = val['code_id'];
+                        var point = val['point'];
+
+                        return this.axiosGetTotalpoints('use/195124');
+                        // totalpoints = axiosGet('use/'+ ekanteisId + '/' + point);
+                    }
+                    this.message = 'QRコードが正常に読み込まれませんでした'
+                })
+                .then((point) => {
+                    this.message = 'ポイントが使用されました'
+                    this.point = point
+                })
+                .catch((error) => {
+                    alert('エラーが発生しました。2' + error);
+                });
+        },
+        axiosGetTotalpoints(url) {
+            return axios.get(`https://sysf.heartful.work/epoints/${url}`)
+                // Successful
+                .then(function (response) {
+                    var totalpoints = response.data['totalPoints'];
+                    alert('response:' + totalpoints);
+                    return totalpoints;
+                })
+                // failure
+                .catch(function (error) {
+                    console.log(error);
+                    alert('通信エラー：' + error);
+                    return error;
+                });
+
+        },
+        // 会員連携モーダル開く
+        opneConnectMember() {
+            this.modalFlag = true
+        },
+        closeMessage() {
+            this.message = null
+        },
     },
     async mounted() {
         // lineブラウザ以外で表示した場合？？
+        // queryの有無で判断(LINEブラウザの場合queryがなかったから)
         if (this.$route.query.liffClientId) {
             this.query = this.$route.query
 
@@ -276,7 +255,14 @@ export default {
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded'
                 }
-            }).catch(err => err.response)
+            }).catch(err => {
+                if (!err.response) {
+                    this.err = err
+                    this.message = 'ネットワークエラー'
+                    return err
+                }
+                return err.response
+            })
 
             this.test = res
         }
@@ -287,8 +273,6 @@ export default {
             this.connectMemberByLineToken()
             this.$store.dispatch('setFirstContact')
         }
-
-
     },
 }
 
