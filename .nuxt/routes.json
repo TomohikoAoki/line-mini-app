@@ -3,36 +3,28 @@
     "name": "privacy",
     "path": "/privacy",
     "component": "/Users/tonQhansoku/Public/project/line-mini-app/line-liff-v2-starter/src/nuxtjs/pages/privacy.vue",
-    "chunkName": "pages/privacy"
-  },
-  {
-    "name": "register",
-    "path": "/register",
-    "component": "/Users/tonQhansoku/Public/project/line-mini-app/line-liff-v2-starter/src/nuxtjs/pages/register.vue",
-    "chunkName": "pages/register"
+    "chunkName": "pages/privacy",
+    "_name": "_745c1ca2"
   },
   {
     "name": "terms",
     "path": "/terms",
     "component": "/Users/tonQhansoku/Public/project/line-mini-app/line-liff-v2-starter/src/nuxtjs/pages/terms.vue",
-    "chunkName": "pages/terms"
-  },
-  {
-    "name": "testscan",
-    "path": "/testscan",
-    "component": "/Users/tonQhansoku/Public/project/line-mini-app/line-liff-v2-starter/src/nuxtjs/pages/testscan.vue",
-    "chunkName": "pages/testscan"
+    "chunkName": "pages/terms",
+    "_name": "_e3de38be"
   },
   {
     "name": "top",
     "path": "/top",
     "component": "/Users/tonQhansoku/Public/project/line-mini-app/line-liff-v2-starter/src/nuxtjs/pages/top.vue",
-    "chunkName": "pages/top"
+    "chunkName": "pages/top",
+    "_name": "_8ee6c622"
   },
   {
     "name": "index",
     "path": "/",
     "component": "/Users/tonQhansoku/Public/project/line-mini-app/line-liff-v2-starter/src/nuxtjs/pages/index.vue",
-    "chunkName": "pages/index"
+    "chunkName": "pages/index",
+    "_name": "_37d9b528"
   }
 ]

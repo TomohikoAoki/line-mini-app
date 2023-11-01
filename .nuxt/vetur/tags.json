@@ -8,8 +8,14 @@
   "ModalFlashMessage": {
     "description": "Auto imported from components/Modal/FlashMessage.vue"
   },
+  "ModalUsePoint": {
+    "description": "Auto imported from components/Modal/UsePoint.vue"
+  },
   "SvgBase": {
     "description": "Auto imported from components/Svg/Base.vue"
+  },
+  "SvgDataClose": {
+    "description": "Auto imported from components/Svg/Data/Close.vue"
   },
   "SvgDataDisplayPointBottom": {
     "description": "Auto imported from components/Svg/Data/DisplayPointBottom.vue"

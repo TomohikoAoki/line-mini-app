@@ -230,7 +230,7 @@ function resolveComponents (route) {
 }
 
 function callMiddleware (Components, context, layout) {
-  let midd = ["CheckLogin"]
+  let midd = []
   let unknownMiddleware = false
 
   // If layout is undefined, only call global middleware
