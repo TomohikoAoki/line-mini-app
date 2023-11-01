@@ -205,6 +205,7 @@ export default {
         },
         // QRコードリーダー起動 & ポイント使用
         usePoint(point) {
+            this.usePointModalFlag = false
             liff.scanCodeV2()
                 .then((result) => {
                     if (result.value != null) {

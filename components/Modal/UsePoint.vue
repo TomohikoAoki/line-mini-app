@@ -30,7 +30,7 @@
                             <p>よろしいですか？</p>
                         </div>
                         <div class="confirm-btn-area">
-                            <button @click.prevent="connect" class="btn2 connect">
+                            <button @click.prevent="usePoint" class="btn2 connect">
                                 送信
                             </button>
                             <button @click.prevent="correction" class="btn2 correction">
@@ -97,7 +97,7 @@ export default {
     },
     methods: {
         usePoint() {
-            $emit('usePoint', this.formData.point)
+            this.$emit('usePoint', this.formData.point)
         },
         confirm() {
             this.confirmFlag = true
