@@ -29,7 +29,7 @@
                 </div>
                 <p class="navi-item__text">ポイントを<br>貯める</p>
             </div>
-            <div class="navi-item" @click="usePoint">
+            <div class="navi-item" @click="usePointOpen">
                 <div class="navi-item__icon">
                     <SvgBase icon-name="icon-navi-add" viewBox="0 0 77.5 85.4" iconColor="#efb94b" iconTitle="ポイントを貯める">
                         <IconNaviAdd></IconNaviAdd>
@@ -39,8 +39,14 @@
             </div>
         </div>
         <Transition name="fade">
-            <ConnectConfirm v-model="modalFlag" v-if="modalFlag" @formData="connectMember" class="connect-confirm">
+            <ConnectConfirm v-model="modalFlag" v-if="modalFlag" @formData="connectMember"
+                class="fixed-modal connect-confirm">
             </ConnectConfirm>
+        </Transition>
+        <Transition name="fade">
+            <UsePointModal v-model="usePointModalFlag" v-if="usePointModalFlag" :totalPoint="point" @usePoint="usePoint"
+                class="fixed-modal connect-confirm">
+            </UsePointModal>
         </Transition>
         <Transition name="fade">
             <FlashMessage v-if="message" @close="closeMessage">{{ message }}</FlashMessage>
@@ -63,6 +69,7 @@
 
 <script>
 import ConnectConfirm from '../components/Modal/ConnectConfirm.vue'
+import UsePointModal from '../components/Modal/UsePoint.vue'
 import FlashMessage from '../components/Modal/FlashMessage.vue'
 
 import SvgBase from '../components/Svg/Base.vue'
@@ -77,7 +84,8 @@ export default {
     data() {
         return {
             modalFlag: false,
-            point: 0,
+            usePointModalFlag: false,
+            point: 100,
             message: null,
             response: null,
             test: null,
@@ -87,6 +95,7 @@ export default {
     },
     components: {
         ConnectConfirm,
+        UsePointModal,
         FlashMessage,
         SvgBase,
         DisplayPointTop,
@@ -191,24 +200,26 @@ export default {
                 });
             $nuxt.$loading.finish();
         },
+        usePointOpen() {
+            this.usePointModalFlag = true
+        },
         // QRコードリーダー起動 & ポイント使用
-        usePoint() {
+        usePoint(point) {
             liff.scanCodeV2()
                 .then((result) => {
                     if (result.value != null) {
                         var val = JSON.parse(result.value);
                         // 【code_id】修正予定
                         var ekanteisId = val['code_id'];
-                        var point = val['point'];
 
-                        return this.axiosGetTotalpoints('use/195124');
+                        return this.axiosGetTotalpoints(`use/100/${point}`);
                         // totalpoints = axiosGet('use/'+ ekanteisId + '/' + point);
                     }
                     this.message = 'QRコードが正常に読み込まれませんでした'
                 })
-                .then((point) => {
-                    this.message = 'ポイントが使用されました'
-                    this.point = point
+                .then((returnPoint) => {
+                    this.message = 'ポイントが使用しました。'
+                    this.point = returnPoint
                 })
                 .catch((error) => {
                     alert('エラーが発生しました。2' + error);
@@ -388,7 +399,7 @@ $baseColor : #efb94b;
     font-weight: bold;
 }
 
-.connect-confirm {
+.fixed-modal {
     width: 100vw;
     position: fixed;
     top: 0;

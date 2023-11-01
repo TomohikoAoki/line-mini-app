@@ -35,10 +35,17 @@
                     確認
                 </button>
             </form>
-            <br>
             <div class="close-area">
                 <p class="close-area__text">会員登録なしでLINE内でハートフルポイントを貯める場合は閉じるを押してください。</p>
-                <button @click="close" class="btn">閉じる</button>
+                <button @click="close" class="close">
+                    <span class="close-icon">
+                        <SvgBase icon-name="icon-navi-add" viewBox="0 -960 960 960" iconColor="#504848;"
+                            iconTitle="モーダル閉じる">
+                            <IconClose></IconClose>
+                        </SvgBase>
+                    </span>
+                    <span class="close-text">CLOSE</span>
+                </button>
             </div>
         </div>
     </div>
@@ -47,9 +54,11 @@
 <script>
 import {
     disableBodyScroll,
-    enableBodyScroll,
     clearAllBodyScrollLocks,
 } from "body-scroll-lock";
+
+import SvgBase from '../../components/Svg/Base.vue'
+import IconClose from '../../components/Svg/Data/Close.vue'
 
 export default {
     data() {
@@ -76,6 +85,10 @@ export default {
             }
 
         }
+    },
+    components: {
+        SvgBase,
+        IconClose
     },
     methods: {
         connect() {
@@ -201,12 +214,14 @@ export default {
 .btn {
     width: 100px;
     margin: 0 auto;
-    padding: 1.2em 0;
-    text-align: center;
+    padding: 1.0em 0;
     background-color: #854b4b;
     border-radius: 10px;
     color: #fff;
     font-weight: bold;
+    letter-spacing: 0.5em;
+    text-align: center;
+    text-indent: 0.5em;
 
     &.disable {
         opacity: 0.2;
@@ -220,6 +235,30 @@ export default {
         text-align: center;
         padding-bottom: 1em;
         font-size: 0.9em;
+    }
+
+    .close {
+        width: 150px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        color: #504848;
+
+        .close-icon {
+            display: block;
+            width: 30px;
+            margin: 0 0.2em;
+        }
+
+        .close-text {
+            display: block;
+            font-size: 18px;
+            margin: 0 0.2em;
+            color: #504848;
+
+        }
     }
 }
 </style>
