@@ -6,7 +6,8 @@
     "dev": "cross-env NODE_ENV=development nuxt -p 9000",
     "build": "nuxt build",
     "start": "nuxt start",
-    "generate": "cross-env NODE_ENV=\"development\" nuxt generate",
+    "generate": "開発用はgenerate:devー審査用はgenerate:examー本番用はgenerate:prodでやってください。",
+    "generate:dev": "cross-env NODE_ENV=\"development\" nuxt generate",
     "generate:exam": "cross-env NODE_ENV=\"examination\" nuxt generate",
     "generate:prod": "cross-env NODE_ENV=\"production\" nuxt generate"
   },
