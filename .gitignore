@@ -1,4 +1,6 @@
 node_modules
 dist
 .nuxt
-.env
+env.development.js
+env.examination.js
+env.production.js

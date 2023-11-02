@@ -14,15 +14,12 @@
 </template>
 
 <script>
-import packageJson from "../package.json";
-
 import SvgBase from "../components/Svg/Base.vue"
 import TopImage from "../components/Svg/Data/TopImage.vue"
 
 export default {
   data: function () {
     return {
-      version: packageJson.version,
       sdkVersion: "",
       liffError: ""
     };
