@@ -1,9 +1,12 @@
+const environment = process.env.NODE_ENV || 'development'
+const envSettings = require(`./env.${environment}.js`)
+
 export default {
   target: "static",
   head: {
-    title: "LIFF Starter",
+    title: "ハートフルミニアプリ",
     htmlAttrs: {
-      lang: "en",
+      lang: "ja",
     },
     meta: [
       { charset: "utf-8" },
@@ -26,10 +29,7 @@ export default {
   components: true,
 
   // Modules for dev and build (recommended): https://go.nuxtjs.dev/config-modules
-  buildModules: ["@nuxtjs/dotenv"],
-  dotenv: {
-    path: process.cwd(),
-  },
+  buildModules: [],
 
   //loading component
   loading: "./components/Loading.vue",
@@ -37,14 +37,16 @@ export default {
   // Modules: https://go.nuxtjs.dev/config-modules
   modules: [],
 
+  env: envSettings,
+
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {},
 
-  // router: {
-  //   middleware: ['CheckLogin'],
-  // },
-
-  env: {
-    LIFF_ID: process.env.LIFF_ID,
+  router: {
+    middleware: ['CheckLogin'],
   },
+
+  // env: {
+  //   LIFF_ID: process.env.LIFF_ID,
+  // },
 };

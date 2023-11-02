@@ -3,17 +3,20 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "nuxt -p 9000",
+    "dev": "cross-env NODE_ENV=development nuxt -p 9000",
     "build": "nuxt build",
     "start": "nuxt start",
-    "generate": "nuxt generate"
+    "generate": "開発用はgenerate:devー審査用はgenerate:examー本番用はgenerate:prodでやってください。",
+    "generate:dev": "cross-env NODE_ENV=\"development\" nuxt generate",
+    "generate:exam": "cross-env NODE_ENV=\"examination\" nuxt generate",
+    "generate:prod": "cross-env NODE_ENV=\"production\" nuxt generate"
   },
   "dependencies": {
     "@line/liff": "^2.16.0",
     "@nuxtjs/axios": "^5.13.6",
-    "@nuxtjs/dotenv": "^1.4.1",
     "body-scroll-lock": "^3.1.5",
     "core-js": "^3.15.1",
+    "cross-env": "^7.0.3",
     "nuxt": "^2.15.7"
   },
   "devDependencies": {

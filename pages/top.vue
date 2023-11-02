@@ -38,19 +38,6 @@
                 <p class="navi-item__text">ポイントを<br>使う</p>
             </div>
         </div>
-        <Transition name="fade">
-            <ConnectConfirm v-model="modalFlag" v-if="modalFlag" @formData="connectMember"
-                class="fixed-modal connect-confirm">
-            </ConnectConfirm>
-        </Transition>
-        <Transition name="fade">
-            <UsePointModal v-model="usePointModalFlag" v-if="usePointModalFlag" :totalPoint="point" @usePoint="usePoint"
-                class="fixed-modal connect-confirm">
-            </UsePointModal>
-        </Transition>
-        <Transition name="fade">
-            <FlashMessage v-if="message" @close="closeMessage">{{ message }}</FlashMessage>
-        </Transition>
         <nav class="link">
             <ul class="link__list">
                 <li class="link__list_item"><span class="item_container" @click="opneConnectMember">会員連携</span></li>
@@ -58,6 +45,19 @@
                 <li class="link__list_item"><nuxt-link to="/privacy" class="item_container">プライバシーポリシー</nuxt-link></li>
             </ul>
         </nav>
+        <Transition name="fade">
+            <ConnectConfirm v-model="modalFlag" v-if="modalFlag" @formData="connectMember"
+                class="fixed-modal connect-confirm">
+            </ConnectConfirm>
+        </Transition>
+        <Transition name="fade">
+            <UsePointModal v-model="usePointModalFlag" v-if="usePointModalFlag" :totalPoint="point" @usePoint="usePoint"
+                class="fixed-modal use-point">
+            </UsePointModal>
+        </Transition>
+        <Transition name="fade">
+            <FlashMessage v-if="message" @close="closeMessage">{{ message }}</FlashMessage>
+        </Transition>
         <div class="test">
             <p><span class="labeel">response</span><br> {{ response }}</p>
             <p><span class="labeel">err</span><br>{{ err }}</p>
@@ -261,7 +261,7 @@ export default {
             formData.append('code', `${this.$route.query.code}`)
             formData.append('redirect_uri', `${this.$route.query.liffRedirectUri}`)
             formData.append('client_id', `${this.$route.query.liffClientId}`)
-            formData.append('client_secret', '2ad91db933341ce52b3b92d586a09ef9')
+            formData.append('client_secret', `${process.env.CHANNEL_SECRET}`)
 
             const res = await axios.post('https://api.line.me/oauth2/v2.1/token', formData, {
                 headers: {
@@ -311,15 +311,6 @@ $baseColor : #efb94b;
     margin: 0 auto;
     padding: 50px 10px;
     border-radius: 10px;
-
-    .point-title {
-        text-align: center;
-        background-color: #d99090;
-        font-weight: bold;
-        color: #fff;
-        padding: 1em;
-        border-radius: 10px 10px 0 0;
-    }
 }
 
 .point-content {
@@ -388,31 +379,6 @@ $baseColor : #efb94b;
     }
 }
 
-.btn {
-    display: block;
-    width: 100px;
-    margin: 20px auto;
-    padding: 1.2em 0;
-    text-align: center;
-    background-color: #854b4b;
-    border-radius: 10px;
-    color: #fff;
-    font-weight: bold;
-}
-
-.fixed-modal {
-    width: 100vw;
-    position: fixed;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 1001;
-    overflow-y: scroll;
-    -webkit-overflow-scrolling: auto;
-}
-
 .link {
     width: 90%;
     margin: 0 auto;
@@ -443,9 +409,24 @@ $baseColor : #efb94b;
                 }
             }
         }
-
-
     }
+}
+
+.fixed-modal {
+    width: 100vw;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1001;
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: auto;
+
+    &.connect-confirm {}
+
+    &.use-point {}
 }
 
 .test {
