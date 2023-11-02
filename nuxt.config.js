@@ -43,10 +43,6 @@ export default {
   build: {},
 
   router: {
-    middleware: ['CheckLogin'],
+    // middleware: ['CheckLogin'],
   },
-
-  // env: {
-  //   LIFF_ID: process.env.LIFF_ID,
-  // },
 };

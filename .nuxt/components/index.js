@@ -7,6 +7,7 @@ export { default as SvgDataClose } from '../../components/Svg/Data/Close.vue'
 export { default as SvgDataDisplayPointBottom } from '../../components/Svg/Data/DisplayPointBottom.vue'
 export { default as SvgDataDisplayPointTop } from '../../components/Svg/Data/DisplayPointTop.vue'
 export { default as SvgDataIconNaviAdd } from '../../components/Svg/Data/IconNaviAdd.vue'
+export { default as SvgDataIconNaviUse } from '../../components/Svg/Data/IconNaviUse.vue'
 export { default as SvgDataTopImage } from '../../components/Svg/Data/TopImage.vue'
 
 // nuxt/nuxt.js#8607
