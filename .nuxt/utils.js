@@ -200,7 +200,7 @@ export async function setContext (app, context) {
       payload: context.payload,
       error: context.error,
       base: app.router.options.base,
-      env: {"LIFF_ID":"2001061637-2gNwm9z5","CHANNEL_SECRET":"2ad91db933341ce52b3b92d586a09ef9"}
+      env: {"LIFF_ID":"2001061637-2gNwm9z5","CHANNEL_SECRET":"2ad91db933341ce52b3b92d586a09ef9","REDIRECT_URI":"https://line-mini-app.netlify.app/top"}
     }
     // Only set once
 

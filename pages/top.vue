@@ -58,12 +58,14 @@
         <Transition name="fade">
             <FlashMessage v-if="message" @close="closeMessage">{{ message }}</FlashMessage>
         </Transition>
+        <!--
         <div class="test">
             <p><span class="labeel">response</span><br> {{ response }}</p>
             <p><span class="labeel">err</span><br>{{ err }}</p>
             <p><span class="labeel">query</span><br>{{ query }}</p>
             <p><span class="labeel">test</span><br>{{ test }}</p>
         </div>
+        -->
     </div>
 </template>
 
@@ -225,7 +227,7 @@ export default {
                     this.point = returnPoint
                 })
                 .catch((error) => {
-                    alert('エラーが発生しました。2' + error);
+                    console.log(error)
                 });
         },
         axiosGetTotalpoints(url) {
@@ -233,13 +235,12 @@ export default {
                 // Successful
                 .then(function (response) {
                     var totalpoints = response.data['totalPoints'];
-                    alert('response:' + totalpoints);
+                    console.log(error)
                     return totalpoints;
                 })
                 // failure
                 .catch(function (error) {
-                    console.log(error);
-                    alert('通信エラー：' + error);
+                    console.log(error)
                     return error;
                 });
 
@@ -253,36 +254,6 @@ export default {
         },
     },
     async mounted() {
-        // lineブラウザ以外で表示した場合？？
-        // queryの有無で判断(LINEブラウザの場合queryがなかったから)
-        if (this.$route.query.liffClientId) {
-            this.query = this.$route.query
-
-            let formData = new URLSearchParams()
-            formData.append('grant_type', 'authorization_code')
-            formData.append('code', `${this.$route.query.code}`)
-            formData.append('redirect_uri', `${this.$route.query.liffRedirectUri}`)
-            formData.append('client_id', `${this.$route.query.liffClientId}`)
-            formData.append('client_secret', `${process.env.CHANNEL_SECRET}`)
-
-            const res = await axios.post('https://api.line.me/oauth2/v2.1/token', formData, {
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                }
-            }).catch(err => {
-                if (!err.response) {
-                    this.err = err
-                    this.message = 'ネットワークエラー'
-                    return err
-                }
-                return err.response
-            })
-
-            this.test = res
-        }
-
-        // 初回のみ自動で
-        // LineIdが紐づいていればpoint取得
         if (this.firstContact) {
             this.connectMemberByLineToken()
             this.$store.dispatch('setFirstContact')

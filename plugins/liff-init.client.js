@@ -10,7 +10,7 @@ export default (context, inject) => {
   inject('liff', liff);
 
   // execute liff.init()
-  const initResult = liff.init({liffId: process.env.LIFF_ID})
+  const initResult = liff.init({ liffId: process.env.LIFF_ID, withLoginOnExternalBrowser: true })
     .then(() => {
       console.log('liff.init() done');
     })
