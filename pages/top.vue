@@ -23,7 +23,7 @@
         <div class="navi">
             <div class="navi-item" @click="addPoint">
                 <div class="navi-item__icon">
-                    <SvgBase icon-name="icon-navi-add" viewBox="0 0 77.5 85.4" iconColor="#efb94b" iconTitle="ポイントを貯める">
+                    <SvgBase icon-name="icon-navi-add" viewBox="0 0 237 320.8" iconColor="#efb94b" iconTitle="ポイントを貯める">
                         <IconNaviAdd></IconNaviAdd>
                     </SvgBase>
                 </div>
@@ -31,8 +31,8 @@
             </div>
             <div class="navi-item" @click="usePointOpen">
                 <div class="navi-item__icon">
-                    <SvgBase icon-name="icon-navi-add" viewBox="0 0 77.5 85.4" iconColor="#efb94b" iconTitle="ポイントを貯める">
-                        <IconNaviAdd></IconNaviAdd>
+                    <SvgBase icon-name="icon-navi-add" viewBox="0 0 237 320.8" iconColor="#efb94b" iconTitle="ポイントを貯める">
+                        <IconNaviUse></IconNaviUse>
                     </SvgBase>
                 </div>
                 <p class="navi-item__text">ポイントを<br>使う</p>
@@ -58,12 +58,14 @@
         <Transition name="fade">
             <FlashMessage v-if="message" @close="closeMessage">{{ message }}</FlashMessage>
         </Transition>
+        <!--
         <div class="test">
             <p><span class="labeel">response</span><br> {{ response }}</p>
             <p><span class="labeel">err</span><br>{{ err }}</p>
             <p><span class="labeel">query</span><br>{{ query }}</p>
             <p><span class="labeel">test</span><br>{{ test }}</p>
         </div>
+        -->
     </div>
 </template>
 
@@ -76,6 +78,7 @@ import SvgBase from '../components/Svg/Base.vue'
 import DisplayPointTop from '../components/Svg/Data/DisplayPointTop'
 import DisplayPointBottom from '../components/Svg/Data/DisplayPointBottom'
 import IconNaviAdd from '../components/Svg/Data/IconNaviAdd'
+import IconNaviUse from '../components/Svg/Data/IconNaviUse'
 
 import { mapGetters } from 'vuex'
 import axios from 'axios'
@@ -100,7 +103,8 @@ export default {
         SvgBase,
         DisplayPointTop,
         DisplayPointBottom,
-        IconNaviAdd
+        IconNaviAdd,
+        IconNaviUse
     },
     computed: {
         ...mapGetters({
@@ -223,7 +227,7 @@ export default {
                     this.point = returnPoint
                 })
                 .catch((error) => {
-                    alert('エラーが発生しました。2' + error);
+                    console.log(error)
                 });
         },
         axiosGetTotalpoints(url) {
@@ -231,13 +235,12 @@ export default {
                 // Successful
                 .then(function (response) {
                     var totalpoints = response.data['totalPoints'];
-                    alert('response:' + totalpoints);
+                    console.log(error)
                     return totalpoints;
                 })
                 // failure
                 .catch(function (error) {
-                    console.log(error);
-                    alert('通信エラー：' + error);
+                    console.log(error)
                     return error;
                 });
 
@@ -251,36 +254,6 @@ export default {
         },
     },
     async mounted() {
-        // lineブラウザ以外で表示した場合？？
-        // queryの有無で判断(LINEブラウザの場合queryがなかったから)
-        if (this.$route.query.liffClientId) {
-            this.query = this.$route.query
-
-            let formData = new URLSearchParams()
-            formData.append('grant_type', 'authorization_code')
-            formData.append('code', `${this.$route.query.code}`)
-            formData.append('redirect_uri', `${this.$route.query.liffRedirectUri}`)
-            formData.append('client_id', `${this.$route.query.liffClientId}`)
-            formData.append('client_secret', `${process.env.CHANNEL_SECRET}`)
-
-            const res = await axios.post('https://api.line.me/oauth2/v2.1/token', formData, {
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                }
-            }).catch(err => {
-                if (!err.response) {
-                    this.err = err
-                    this.message = 'ネットワークエラー'
-                    return err
-                }
-                return err.response
-            })
-
-            this.test = res
-        }
-
-        // 初回のみ自動で
-        // LineIdが紐づいていればpoint取得
         if (this.firstContact) {
             this.connectMemberByLineToken()
             this.$store.dispatch('setFirstContact')
@@ -380,7 +353,7 @@ $baseColor : #efb94b;
 }
 
 .link {
-    width: 90%;
+    width: 85%;
     margin: 0 auto;
     color: #efb94b;
     padding-top: 30px;
@@ -401,7 +374,12 @@ $baseColor : #efb94b;
                 display: block;
                 width: 100%;
                 height: 100%;
-                padding: 1em;
+                padding: 1em 1em 1em 2.2em;
+                background-image: url(~static/images/icon-link.svg);
+                background-position: left 0.5em center;
+                background-size: auto 45%;
+                background-repeat: no-repeat;
+
 
                 &:hover {
                     filter: brightness(120%);

@@ -26,6 +26,9 @@
   "SvgDataIconNaviAdd": {
     "description": "Auto imported from components/Svg/Data/IconNaviAdd.vue"
   },
+  "SvgDataIconNaviUse": {
+    "description": "Auto imported from components/Svg/Data/IconNaviUse.vue"
+  },
   "SvgDataTopImage": {
     "description": "Auto imported from components/Svg/Data/TopImage.vue"
   }

@@ -4,3 +4,4 @@ dist
 env.development.js
 env.examination.js
 env.production.js
+.netlify

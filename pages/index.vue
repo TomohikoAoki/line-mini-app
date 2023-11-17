@@ -6,9 +6,6 @@
       </SvgBase>
     </div>
     <p class="top-text">ラインと連携したハートフルのアプリ。<br>ポイントの確認や、ポイント付与、ポイントの利用ができます</p>
-    <div class="login-area">
-      <button @click="login" class="home__buttons__button button--primary">LINEでログイン</button>
-    </div>
 
   </div>
 </template>
@@ -28,20 +25,15 @@ export default {
     SvgBase,
     TopImage
   },
-  methods: {
-    async login() {
-      await liff.login()
-    }
-  },
   mounted() {
     // mounted() is rendered when DOM is rendered
     // wait liff.init()
     this.$liffInit
-      .then(() => {
+      .then(async () => {
         this.sdkVersion = liff.getVersion();
 
-        const token = liff.getIDToken();
-        const profileData = liff.getDecodedIDToken()
+        const token = await liff.getIDToken();
+        const profileData = await liff.getDecodedIDToken()
 
         //storeにLINEのtokenとprofileを保存
         this.$store.dispatch('setToken', token)
@@ -85,40 +77,66 @@ body {
 .home__buttons__button {
   min-width: 250px;
   cursor: pointer;
-  display: inline-block;
-  font-weight: 400;
-  text-align: center;
-  vertical-align: middle;
-  user-select: none;
-  border: 1px solid transparent;
-  padding: 0.375rem 0.75rem;
-  font-size: 0.9375rem;
-  line-height: 1.5;
-  border-radius: 2px;
-  text-decoration: none;
-  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out,
-    border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
 .button--primary {
   color: #fff;
-  background-color: #00b900;
-  border-color: #00b900;
+  background-color: #06C755;
+  display: flex;
+  width: 250px;
+  margin: 0 auto;
+  align-items: center;
+  position: relative;
+  border-radius: 10px;
+
+  &::before {
+    position: absolute;
+    content: "";
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    display: block;
+  }
+
+  &:hover {
+    &::before {
+      background-color: rgba(0, 0, 0, 0.1);
+    }
+  }
+
+  &:active {
+    &::before {
+      background-color: rgba(0, 0, 0, 0.3);
+    }
+  }
+
+  .line-login-image {
+    width: 50px;
+    height: 50px;
+    background-image: url(assets/images/line_132.png);
+    background-size: contain;
+    border-right: 1px solid rgba(0, 0, 0, 0.08);
+    position: relative;
+    z-index: 2;
+  }
+
+  .line-login-text {
+    flex: 1;
+    text-align: center;
+    padding: 0 40px;
+    z-index: 3;
+  }
 }
 
 .button--primary:hover {
   color: #fff;
-  background-color: #009300;
-  border-color: #008600;
+  background-color: #06C755;
+  border-color: #06C755;
 }
 
 @media screen and (max-width: 600px) {
   html {
     font-size: 12px;
-  }
-
-  .home__buttons__button {
-    font-size: 1.5rem;
   }
 }
 </style>

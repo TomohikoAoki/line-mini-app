@@ -19,7 +19,7 @@
                                 </div>
                             </div>
                         </div>
-                        <button @click.prevent="confirm" class="btn" :disabled="!validation.point"
+                        <button @click.prevent="confirm" class="form-btn" :disabled="!validation.point"
                             :class="{ disable: !validation.point }">
                             確認
                         </button>
@@ -178,6 +178,7 @@ export default {
 }
 
 .form {
+    display: block;
     width: 90%;
     position: absolute;
     top: 0;
@@ -211,6 +212,23 @@ export default {
                     border-color: rgb(138, 61, 16);
                 }
             }
+        }
+    }
+
+    .form-btn {
+        width: 100px;
+        margin: 0 auto;
+        padding: 1.0em 0;
+        background-color: #854b4b;
+        border-radius: 10px;
+        color: #fff;
+        font-weight: bold;
+        letter-spacing: 0.5em;
+        text-align: center;
+        text-indent: 0.5em;
+
+        &.disable {
+            opacity: 0.2;
         }
     }
 }
@@ -252,23 +270,6 @@ export default {
 
     span {
         color: brown;
-    }
-}
-
-.btn {
-    width: 100px;
-    margin: 0 auto;
-    padding: 1.0em 0;
-    background-color: #854b4b;
-    border-radius: 10px;
-    color: #fff;
-    font-weight: bold;
-    letter-spacing: 0.5em;
-    text-align: center;
-    text-indent: 0.5em;
-
-    &.disable {
-        opacity: 0.2;
     }
 }
 
